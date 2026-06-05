@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Deutsch Connect Center | Du học nghề & việc làm Đức</title>
+  <meta name="description" content="Deutsch Connect Center hỗ trợ du học nghề Đức, chuyển đổi văn bằng, Au-pair và việc làm tại Đức." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="#top">
+        <span class="brand-mark">DCC</span>
+        <span>Deutsch Connect Center</span>
+      </a>
+      <nav class="nav-links">
+        <a href="#orders">Đơn hàng</a>
+        <a href="#pathway">Lộ trình</a>
+        <a href="#register">Đăng ký</a>
+        <a class="staff-link" href="https://app.deutschconnectcenter.com">Nhân viên</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero">
+      <div class="container hero-grid">
+        <div>
+          <p class="eyebrow">Cầu nối Việt Nam - Đức</p>
+          <h1>Đi Đức đúng lộ trình, rõ hồ sơ, có người đồng hành.</h1>
+          <p class="hero-text">Deutsch Connect Center hỗ trợ học tiếng Đức, định hướng ngành nghề, chuẩn bị hồ sơ và kết nối cơ hội học tập - làm việc tại Đức.</p>
+          <div class="hero-actions">
+            <a class="btn primary" href="#register">Đăng ký tư vấn</a>
+            <a class="btn secondary" href="#orders">Xem đơn hàng</a>
+          </div>
+          <div class="trust-row">
+            <span>Du học nghề</span>
+            <span>18A / 18B</span>
+            <span>Au-pair</span>
+            <span>Hồ sơ visa</span>
+          </div>
+        </div>
+        <div class="hero-card">
+          <h2>DCC Operating Center</h2>
+          <p>Thông tin khách hàng đăng ký trên website sẽ được đưa về hệ thống nội bộ để nhân viên chăm sóc và xử lý hồ sơ.</p>
+          <ul>
+            <li>Không bỏ sót khách hàng mới</li>
+            <li>Theo dõi trạng thái hồ sơ</li>
+            <li>Phân công chăm sóc rõ ràng</li>
+          </ul>
+          <a class="small-link" href="https://app.deutschconnectcenter.com">Vào app nhân viên →</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section services">
+      <div class="container">
+        <p class="eyebrow">Dịch vụ trọng tâm</p>
+        <h2>Những hướng đi phù hợp cho người muốn sang Đức</h2>
+        <div class="cards">
+          <article class="card"><h3>Du học nghề Đức</h3><p>Định hướng ngành, học tiếng Đức, phỏng vấn doanh nghiệp và chuẩn bị hồ sơ visa.</p></article>
+          <article class="card"><h3>Chuyển đổi văn bằng</h3><p>Hỗ trợ người có bằng trung cấp, cao đẳng, đại học tìm cơ hội làm việc tại Đức.</p></article>
+          <article class="card"><h3>Au-pair Đức</h3><p>Hướng dẫn hồ sơ, thư động lực, hợp đồng, lịch hẹn và lộ trình sau Au-pair.</p></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="orders" class="section orders-section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Đơn hàng đang tuyển</p>
+            <h2>Cơ hội mới nhất</h2>
+          </div>
+          <p class="muted">Bản đầu dùng dữ liệu mẫu. Sau này đơn hàng sẽ lấy trực tiếp từ Supabase.</p>
+        </div>
+        <div id="ordersList" class="orders-list"></div>
+      </div>
+    </section>
+
+    <section id="pathway" class="section pathway">
+      <div class="container">
+        <p class="eyebrow">Lộ trình làm việc</p>
+        <h2>Quy trình đồng hành cùng học viên</h2>
+        <div class="steps">
+          <div><span>01</span><h3>Tư vấn định hướng</h3><p>Xác định ngành, trình độ tiếng Đức, tài chính và mục tiêu.</p></div>
+          <div><span>02</span><h3>Chuẩn bị hồ sơ</h3><p>Kiểm tra giấy tờ, dịch thuật, CV, thư động lực và hợp đồng.</p></div>
+          <div><span>03</span><h3>Phỏng vấn & visa</h3><p>Luyện phỏng vấn, đặt lịch, theo dõi tiến độ và bổ sung hồ sơ.</p></div>
+          <div><span>04</span><h3>Đồng hành sau bay</h3><p>Hỗ trợ nhập cảnh, ổn định ban đầu và kết nối đối tác tại Đức.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="register" class="section register-section">
+      <div class="container register-grid">
+        <div>
+          <p class="eyebrow">Đăng ký tư vấn</p>
+          <h2>Để lại thông tin, DCC sẽ liên hệ lại.</h2>
+          <p class="muted">Bản này đã có form. Khi anh dán Supabase URL và key vào file <b>config.js</b>, dữ liệu sẽ lưu về Supabase.</p>
+        </div>
+        <form id="leadForm" class="lead-form">
+          <label>Họ và tên<input name="full_name" required placeholder="Ví dụ: Nguyễn Văn A" /></label>
+          <label>Số điện thoại<input name="phone" required placeholder="Ví dụ: 09xxxxxxxx" /></label>
+          <label>Email<input name="email" type="email" placeholder="email@example.com" /></label>
+          <label>Hướng quan tâm
+            <select name="interest" required>
+              <option value="">Chọn nhu cầu</option>
+              <option>Du học nghề Đức</option>
+              <option>Chuyển đổi văn bằng 18A / 18B</option>
+              <option>Au-pair Đức</option>
+              <option>Học tiếng Đức</option>
+            </select>
+          </label>
+          <label>Nội dung cần tư vấn<textarea name="message" rows="4" placeholder="Em muốn đi ngành nhà hàng, đã có A2..."></textarea></label>
+          <button class="btn primary" type="submit">Gửi thông tin</button>
+          <p id="formMessage" class="form-message"></p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div><h3>Deutsch Connect Center</h3><p>Đồng hành cùng người Việt trên hành trình học tập và làm việc tại Đức.</p></div>
+      <div><p><b>Email:</b> vutuanqb@gmail.com</p><p><b>Website:</b> deutschconnectcenter.com</p></div>
+    </div>
+  </footer>
+
+  <script src="./config.js"></script>
+  <script type="module" src="./app.js"></script>
+</body>
+</html>
