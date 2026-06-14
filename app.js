@@ -237,7 +237,6 @@ function renderHome() {
 
         <div class="bx-stage" aria-hidden="true">
           <canvas class="bx-globe"></canvas>
-          <div class="bx-globe-badge"><span class="bx-globe-badge-mono">DCC</span></div>
           <div class="bx-chip bx-chip-1"><span class="bx-chip-dot"></span> Minh bạch</div>
           <div class="bx-chip bx-chip-2"><span class="bx-chip-dot"></span> Đồng hành</div>
           <div class="bx-chip bx-chip-3"><span class="bx-chip-dot"></span> Đúng diện</div>
@@ -870,55 +869,62 @@ function bindHomeExperience() {
   }
 }
 
-// Vẽ địa cầu mạng lưới xoay (canvas 2D, tự chiếu 3D) + cung sáng Việt Nam → Đức.
+// Vẽ địa cầu holographic: bản đồ thế giới thật (biên giới + tên nước) xoay 3D,
+// khí quyển phát sáng, cung sáng nối Việt Nam → Đức. Dữ liệu: window.DCC_WORLD.
 function startGlobe(canvas, stage, reduce) {
   const ctx = canvas.getContext('2d');
   let W = 0, H = 0, cx = 0, cy = 0, R = 0, DPR = 1;
-  let raf = 0, tick = 0, rot = 0.6, mx = 0, my = 0, tmx = 0, tmy = 0, alive = true;
-  const TILT = -0.42;
+  let raf = 0, tick = 0, rot = -1.1, mx = 0, my = 0, tmx = 0, tmy = 0, alive = true;
+  const TILT = -0.38;
 
-  // Chấm phân bố đều trên mặt cầu (xoắn Fibonacci).
-  const dots = [];
-  const N = 560;
-  for (let i = 0; i < N; i++) {
-    const y = 1 - (i / (N - 1)) * 2;
-    const r = Math.sqrt(Math.max(0, 1 - y * y));
-    const th = i * 2.399963229728653;
-    dots.push([Math.cos(th) * r, y, Math.sin(th) * r]);
-  }
-  // Lưới kinh tuyến + vĩ tuyến (cảm giác wireframe công nghệ).
-  const rings = [];
-  for (let m = 0; m < 12; m++) {
-    const lon = (m / 12) * Math.PI * 2, ring = [];
-    for (let k = 0; k <= 50; k++) {
-      const la = -Math.PI / 2 + (k / 50) * Math.PI;
-      ring.push([Math.cos(la) * Math.sin(lon), Math.sin(la), Math.cos(la) * Math.cos(lon)]);
-    }
-    rings.push(ring);
-  }
-  for (let p = 1; p < 6; p++) {
-    const la = -Math.PI / 2 + (p / 6) * Math.PI, rr = Math.cos(la), yy = Math.sin(la), ring = [];
-    for (let k = 0; k <= 50; k++) {
-      const lo = (k / 50) * Math.PI * 2;
-      ring.push([rr * Math.sin(lo), yy, rr * Math.cos(lo)]);
-    }
-    rings.push(ring);
-  }
-  const ll = (lat, lon) => {
+  const v = (lon, lat) => {
     const la = lat * Math.PI / 180, lo = lon * Math.PI / 180;
     return [Math.cos(la) * Math.sin(lo), Math.sin(la), Math.cos(la) * Math.cos(lo)];
   };
-  const VN = ll(16, 108), DE = ll(51, 10);
-  // Cung lớn (great-circle slerp) nối VN → DE, nâng nhẹ khỏi mặt cầu.
+  const VN = v(108, 16), DE = v(10, 51);
+
+  // Khung cầu: lưới kinh/vĩ tuyến mảnh.
+  const graticule = [];
+  for (let m = 0; m < 12; m++) {
+    const lon = (m / 12) * 360 - 180, ring = [];
+    for (let k = 0; k <= 48; k++) ring.push(v(lon, -90 + (k / 48) * 180));
+    graticule.push(ring);
+  }
+  for (let p = 1; p < 6; p++) {
+    const lat = -90 + (p / 6) * 180, ring = [];
+    for (let k = 0; k <= 48; k++) ring.push(v(-180 + (k / 48) * 360, lat));
+    graticule.push(ring);
+  }
+
+  // Biên giới quốc gia + nhãn tên nước từ window.DCC_WORLD.
+  const borders = [], labels = [];
+  (function buildWorld() {
+    const data = window.DCC_WORLD;
+    if (!Array.isArray(data)) return;
+    let labeled = 0;
+    data.forEach((c) => {
+      const name = c[0], rank = c[1], clon = c[2], clat = c[3], polys = c[4];
+      polys.forEach((flat) => {
+        const ring = [];
+        for (let i = 0; i < flat.length; i += 2) ring.push(v(flat[i], flat[i + 1]));
+        borders.push(ring);
+      });
+      const isVN = name === 'Vietnam', isDE = name === 'Germany';
+      if (isVN || isDE || (rank <= 3 && labeled < 24)) {
+        labels.push({ name: isVN ? 'VIỆT NAM' : isDE ? 'ĐỨC' : name.toUpperCase(), pos: v(clon, clat), hot: isVN || isDE });
+        if (!isVN && !isDE) labeled++;
+      }
+    });
+  })();
+
+  // Cung lớn VN → DE (nâng nhẹ khỏi mặt cầu).
   const arc = [];
-  const dotp = VN[0] * DE[0] + VN[1] * DE[1] + VN[2] * DE[2];
-  const omega = Math.acos(Math.max(-1, Math.min(1, dotp))) || 1e-3;
-  const so = Math.sin(omega) || 1;
+  const dp = VN[0] * DE[0] + VN[1] * DE[1] + VN[2] * DE[2];
+  const omega = Math.acos(Math.max(-1, Math.min(1, dp))) || 1e-3, so = Math.sin(omega) || 1;
   for (let k = 0; k <= 64; k++) {
-    const t = k / 64;
-    const a = Math.sin((1 - t) * omega) / so, b = Math.sin(t * omega) / so;
+    const t = k / 64, a = Math.sin((1 - t) * omega) / so, b = Math.sin(t * omega) / so;
     let x = a * VN[0] + b * DE[0], y = a * VN[1] + b * DE[1], z = a * VN[2] + b * DE[2];
-    const len = Math.hypot(x, y, z) || 1, lift = 1 + 0.18 * Math.sin(Math.PI * t);
+    const len = Math.hypot(x, y, z) || 1, lift = 1 + 0.16 * Math.sin(Math.PI * t);
     arc.push([x / len * lift, y / len * lift, z / len * lift]);
   }
 
@@ -932,98 +938,126 @@ function startGlobe(canvas, stage, reduce) {
     if (!W || !H) return;
     canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
     ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-    cx = W / 2; cy = H / 2; R = Math.min(W, H) * 0.40;
+    cx = W / 2; cy = H / 2; R = Math.min(W, H) * 0.42;
   }
 
   function frame() {
     if (!alive) return;
     tick++;
-    if (!reduce) rot += 0.0024;
+    if (!reduce) rot += 0.0017;
     mx += (tmx - mx) * 0.06; my += (tmy - my) * 0.06;
     const cyr = Math.cos(rot + mx), syr = Math.sin(rot + mx);
     const cxr = Math.cos(TILT + my), sxr = Math.sin(TILT + my);
     const P = (p) => {
       let q = rotY(p, cyr, syr); q = rotX(q, cxr, sxr);
-      const pe = 1 / (1 - q[2] * 0.32);
+      const pe = 1 / (1 - q[2] * 0.28);
       return { x: cx + q[0] * R * pe, y: cy + q[1] * R * pe, z: q[2], s: pe };
     };
     ctx.clearRect(0, 0, W, H);
     if (!W || !H) { raf = requestAnimationFrame(frame); return; }
 
-    // Hào quang khí quyển.
-    const g = ctx.createRadialGradient(cx - R * 0.35, cy - R * 0.4, R * 0.1, cx, cy, R * 1.3);
-    g.addColorStop(0, 'rgba(46,92,158,0.50)');
-    g.addColorStop(0.6, 'rgba(18,44,84,0.30)');
-    g.addColorStop(1, 'rgba(8,18,36,0)');
-    ctx.fillStyle = g;
-    ctx.beginPath(); ctx.arc(cx, cy, R * 1.22, 0, 6.2832); ctx.fill();
-    ctx.strokeStyle = 'rgba(120,170,230,0.18)'; ctx.lineWidth = 1;
-    ctx.beginPath(); ctx.arc(cx, cy, R * 1.02, 0, 6.2832); ctx.stroke();
+    // 1) Khí quyển + đĩa biển tối.
+    const halo = ctx.createRadialGradient(cx, cy, R * 0.55, cx, cy, R * 1.35);
+    halo.addColorStop(0, 'rgba(20,52,98,0)');
+    halo.addColorStop(0.72, 'rgba(36,86,150,0.16)');
+    halo.addColorStop(0.86, 'rgba(96,150,220,0.30)');
+    halo.addColorStop(1, 'rgba(96,150,220,0)');
+    ctx.fillStyle = halo;
+    ctx.beginPath(); ctx.arc(cx, cy, R * 1.35, 0, 6.2832); ctx.fill();
+    const sea = ctx.createRadialGradient(cx - R * 0.3, cy - R * 0.35, R * 0.2, cx, cy, R);
+    sea.addColorStop(0, 'rgba(14,38,72,0.95)');
+    sea.addColorStop(1, 'rgba(7,18,38,0.98)');
+    ctx.fillStyle = sea;
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, 6.2832); ctx.fill();
 
-    // Lưới (chỉ vẽ đoạn ở mặt trước để thấy chiều sâu).
-    ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(96,138,198,0.16)';
-    for (const ring of rings) {
-      ctx.beginPath();
-      let started = false;
+    // Giới hạn map trong đĩa cầu.
+    ctx.save();
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, 6.2832); ctx.clip();
+
+    // 2) Lưới kinh vĩ mờ.
+    ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(90,135,195,0.13)';
+    ctx.beginPath();
+    for (const ring of graticule) {
+      let st = false;
       for (const p of ring) {
         const pr = P(p);
-        if (pr.z <= -0.04) { started = false; continue; }
-        if (!started) { ctx.moveTo(pr.x, pr.y); started = true; } else ctx.lineTo(pr.x, pr.y);
+        if (pr.z <= 0.02) { st = false; continue; }
+        if (!st) { ctx.moveTo(pr.x, pr.y); st = true; } else ctx.lineTo(pr.x, pr.y);
       }
-      ctx.stroke();
-    }
-
-    // Chấm: sáng dần về mặt trước.
-    for (const d of dots) {
-      const pr = P(d);
-      const front = pr.z > 0;
-      const a = front ? 0.30 + 0.55 * pr.z : 0.10;
-      ctx.fillStyle = front ? `rgba(190,212,245,${a})` : `rgba(120,150,205,${a})`;
-      ctx.beginPath(); ctx.arc(pr.x, pr.y, (front ? 1.6 : 1.05) * pr.s, 0, 6.2832); ctx.fill();
-    }
-
-    // Cung sáng VN → DE.
-    ctx.lineWidth = 2.1; ctx.strokeStyle = 'rgba(220,181,98,0.9)';
-    ctx.shadowColor = 'rgba(220,181,98,0.85)'; ctx.shadowBlur = 9;
-    ctx.beginPath();
-    let st = false;
-    for (const p of arc) {
-      const pr = P(p);
-      if (pr.z < -0.18) { st = false; continue; }
-      if (!st) { ctx.moveTo(pr.x, pr.y); st = true; } else ctx.lineTo(pr.x, pr.y);
     }
     ctx.stroke();
-    ctx.shadowBlur = 0;
 
-    // Xung sáng chạy dọc cung.
-    const phase = (tick % 200) / 200;
-    const ai = Math.floor(phase * (arc.length - 1));
+    // 3) Biên giới quốc gia phát sáng (gộp 1 path, vẽ quầng + nét).
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (const ring of borders) {
+      let st = false;
+      for (const p of ring) {
+        const pr = P(p);
+        if (pr.z <= 0.03) { st = false; continue; }
+        if (!st) { ctx.moveTo(pr.x, pr.y); st = true; } else ctx.lineTo(pr.x, pr.y);
+      }
+    }
+    ctx.strokeStyle = 'rgba(150,200,255,0.16)'; ctx.lineWidth = 2.4; ctx.stroke();
+    ctx.strokeStyle = 'rgba(214,226,248,0.6)'; ctx.lineWidth = 0.8; ctx.stroke();
+
+    ctx.restore();
+
+    // 4) Viền cầu (rim).
+    ctx.strokeStyle = 'rgba(120,170,235,0.40)'; ctx.lineWidth = 1.2;
+    ctx.beginPath(); ctx.arc(cx, cy, R, 0, 6.2832); ctx.stroke();
+
+    // 5) Cung VN → DE + xung sáng chạy.
+    ctx.lineWidth = 2; ctx.strokeStyle = 'rgba(224,184,98,0.92)';
+    ctx.shadowColor = 'rgba(224,184,98,0.85)'; ctx.shadowBlur = 9;
+    ctx.beginPath();
+    let ast = false;
+    for (const p of arc) {
+      const pr = P(p);
+      if (pr.z < -0.2) { ast = false; continue; }
+      if (!ast) { ctx.moveTo(pr.x, pr.y); ast = true; } else ctx.lineTo(pr.x, pr.y);
+    }
+    ctx.stroke(); ctx.shadowBlur = 0;
+    const ai = Math.floor(((tick % 200) / 200) * (arc.length - 1));
     const ap = P(arc[ai]);
-    if (ap.z > -0.18) {
-      ctx.fillStyle = 'rgba(255,247,226,0.98)';
+    if (ap.z > -0.2) {
+      ctx.fillStyle = 'rgba(255,248,228,0.98)';
       ctx.shadowColor = 'rgba(255,236,180,0.95)'; ctx.shadowBlur = 14;
-      ctx.beginPath(); ctx.arc(ap.x, ap.y, 3.2 * ap.s, 0, 6.2832); ctx.fill();
-      ctx.shadowBlur = 0;
+      ctx.beginPath(); ctx.arc(ap.x, ap.y, 3 * ap.s, 0, 6.2832); ctx.fill(); ctx.shadowBlur = 0;
     }
 
-    // Mốc Việt Nam & Đức.
-    [[VN, 'VN'], [DE, 'DE']].forEach(([m, label]) => {
+    // 6) Mốc VN/DE (vòng nhịp).
+    [[VN], [DE]].forEach(([m]) => {
       const pr = P(m);
       if (pr.z < 0.02) return;
-      ctx.fillStyle = '#ecca7d';
-      ctx.beginPath(); ctx.arc(pr.x, pr.y, 3.6 * pr.s, 0, 6.2832); ctx.fill();
       const pl = (tick % 90) / 90;
       ctx.strokeStyle = `rgba(236,202,125,${0.55 * (1 - pl)})`; ctx.lineWidth = 1.4;
-      ctx.beginPath(); ctx.arc(pr.x, pr.y, (4 + pl * 12) * pr.s, 0, 6.2832); ctx.stroke();
-      ctx.fillStyle = 'rgba(245,237,224,0.92)';
-      ctx.font = '600 11px "Be Vietnam Pro", system-ui, sans-serif';
-      ctx.fillText(label, pr.x + 10, pr.y + 3);
+      ctx.beginPath(); ctx.arc(pr.x, pr.y, (4 + pl * 13) * pr.s, 0, 6.2832); ctx.stroke();
+      ctx.fillStyle = '#f2d488';
+      ctx.beginPath(); ctx.arc(pr.x, pr.y, 3.4 * pr.s, 0, 6.2832); ctx.fill();
     });
+
+    // 7) Nhãn tên nước (chỉ mặt trước).
+    ctx.textBaseline = 'middle';
+    for (const l of labels) {
+      const pr = P(l.pos);
+      if (pr.z < 0.16) continue;
+      if (l.hot) {
+        ctx.font = '700 12px "Be Vietnam Pro", system-ui, sans-serif';
+        ctx.fillStyle = `rgba(244,212,128,${Math.min(1, 0.5 + pr.z)})`;
+        ctx.shadowColor = 'rgba(224,184,98,0.7)'; ctx.shadowBlur = 8;
+        ctx.fillText(l.name, pr.x + 8, pr.y); ctx.shadowBlur = 0;
+      } else {
+        ctx.font = '600 9.5px "Be Vietnam Pro", system-ui, sans-serif';
+        ctx.fillStyle = `rgba(208,222,245,${0.30 + 0.45 * pr.z})`;
+        ctx.fillText(l.name, pr.x + 5, pr.y);
+      }
+    }
 
     raf = requestAnimationFrame(frame);
   }
 
-  // Tương tác chuột: xoay nhẹ địa cầu + dịch thẻ kính theo chiều sâu.
+  // Tương tác chuột: xoay nhẹ + dịch thẻ kính theo chiều sâu.
   let onMove = null, onLeave = null;
   const hero = $('.bx-hero');
   if (hero && !reduce && window.matchMedia('(pointer: fine)').matches) {
