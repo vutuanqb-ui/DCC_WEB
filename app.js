@@ -228,7 +228,6 @@ function renderHome() {
     ${renderWishSection()}
     ${renderProcessSection()}
     ${renderRisksSection(true)}
-    ${renderGallerySection()}
     ${renderWhySection()}
     ${renderRegisterSection()}
   `;
@@ -354,23 +353,6 @@ function renderRisksSection(short = false) {
   return `<section class="section risks-section" id="risks"><div class="container">${sectionHeader('Minh bạch', 'Những rủi ro nên biết trước khi bắt đầu', 'Chúng tôi nói thẳng về rủi ro để bạn chuẩn bị chủ động — và cho biết DCC giúp bạn giảm thiểu từng điều ra sao.')}
     <div class="risk-list">${list.map(([risk, support]) => `<details class="risk-item"><summary>${risk}</summary><div><h4>DCC hỗ trợ giảm rủi ro bằng cách nào?</h4><p>${support}</p></div></details>`).join('')}</div>
     ${short ? '<a class="btn secondary center-btn" href="#/rui-ro-can-biet">Xem đầy đủ các rủi ro</a>' : ''}
-  </div></section>`;
-}
-
-// Để hiện ẢNH THẬT: điền đường dẫn ảnh vào trường `img` (URL hoặc đường dẫn tương đối, ví dụ './images/lop-hoc.jpg').
-// Ô nào chưa có `img` sẽ tự hiển thị nền màu minh họa.
-const GALLERY = [
-  { label: 'Lớp học tiếng Đức', img: '' },
-  { label: 'Học viên', img: '' },
-  { label: 'Buổi tư vấn', img: '' },
-  { label: 'Hoạt động trung tâm', img: '' },
-  { label: 'Đối tác/đơn hàng', img: '' },
-  { label: 'Nước Đức truyền cảm hứng', img: '' }
-];
-
-function renderGallerySection() {
-  return `<section class="section gallery-section"><div class="container">${sectionHeader('Hình ảnh', 'Không gian học tập và hành trình sang Đức', 'Những khoảnh khắc học tiếng, tư vấn và kết nối Đức – Việt tại Deutsch Connect Center.')}
-    <div class="gallery-grid">${GALLERY.map((item, index) => `<figure class="gallery-item tone-${index + 1}"${item.img ? ` style="background-image:url('${item.img}');background-size:cover;background-position:center;"` : ''}><span>${item.label}</span></figure>`).join('')}</div>
   </div></section>`;
 }
 
