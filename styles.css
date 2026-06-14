@@ -343,6 +343,38 @@ p:last-child { margin-bottom: 0; }
 .aw-actions { display: flex; gap: var(--s3); flex-wrap: wrap; margin-top: var(--s4); }
 @media (max-width: 720px) { .partner-type-row { grid-template-columns: 1fr; } .account-tabs { display: flex; width: 100%; } .account-tab { flex: 1; } .aw-actions .btn { width: 100%; } }
 
+/* ---------- Tra cứu tiến độ hồ sơ ---------- */
+.lookup-form { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s4); box-shadow: var(--shadow-sm); }
+.lookup-result { margin-top: var(--s4); display: grid; gap: var(--s4); }
+.lookup-loading, .lookup-empty { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s4); color: var(--muted); text-align: center; }
+.lookup-head h2 { font-size: 26px; margin-bottom: 4px; }
+.profile-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s4); box-shadow: var(--shadow-sm); }
+.pc-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--s3); margin-bottom: var(--s3); }
+.pc-source { display: inline-block; font-size: 11.5px; font-weight: 700; letter-spacing: .03em; color: var(--gold); text-transform: uppercase; margin-bottom: 4px; }
+.pc-head h3 { font-size: 20px; color: var(--navy); }
+.pc-stage { flex: 0 0 auto; background: linear-gradient(135deg, var(--navy-2), var(--navy)); color: #fff; border-radius: var(--r-pill); padding: 6px 14px; font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.pc-bar { height: 9px; border-radius: var(--r-pill); background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
+.pc-bar span { display: block; height: 100%; border-radius: var(--r-pill); background: linear-gradient(90deg, var(--gold), var(--gold-bright)); transition: width .5s var(--ease); }
+.pc-percent { font-size: 13px; font-weight: 600; color: var(--gold); margin: 7px 0 var(--s3); }
+.prog-steps { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; position: relative; }
+.prog-step { display: flex; flex-direction: column; align-items: center; gap: 7px; text-align: center; position: relative; }
+.prog-step::before { content: ""; position: absolute; top: 14px; left: -50%; width: 100%; height: 2px; background: var(--line); z-index: 0; }
+.prog-step:first-child::before { display: none; }
+.prog-step.done::before, .prog-step.current::before { background: var(--gold); }
+.ps-dot { position: relative; z-index: 1; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 700; background: var(--paper); border: 2px solid var(--line); color: var(--muted); }
+.prog-step.done .ps-dot { background: linear-gradient(135deg, var(--gold), var(--gold-bright)); border-color: transparent; color: #2a1d06; }
+.prog-step.current .ps-dot { border-color: var(--gold); color: var(--gold); box-shadow: 0 0 0 4px rgba(184,138,62,.15); }
+.ps-label { font-size: 11.5px; line-height: 1.3; color: var(--muted); max-width: 11ch; }
+.prog-step.done .ps-label, .prog-step.current .ps-label { color: var(--navy); font-weight: 600; }
+.pc-meta { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: var(--s3); padding-top: var(--s3); border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+@media (max-width: 720px) {
+  .prog-steps { grid-template-columns: 1fr; gap: 0; }
+  .prog-step { flex-direction: row; align-items: flex-start; gap: 12px; text-align: left; padding: 8px 0; }
+  .prog-step::before { top: 0; left: 13px; width: 2px; height: 100%; }
+  .ps-label { max-width: none; font-size: 14px; }
+  .pc-stage { font-size: 11.5px; padding: 5px 11px; }
+}
+
 /* ---------- Quy trình ---------- */
 .process-section { background: linear-gradient(180deg, var(--bg), var(--paper)); }
 .timeline { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--s2); }

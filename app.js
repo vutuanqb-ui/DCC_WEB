@@ -543,11 +543,11 @@ function renderAccountWelcome(account) {
       ${account.email ? `<div class="aw-row"><span>Email</span><b>${account.email}</b></div>` : ''}
       ${account.phone ? `<div class="aw-row"><span>Số điện thoại</span><b>${account.phone}</b></div>` : ''}
       <div class="aw-actions">
-        <a class="btn primary" href="#/tra-cuu-ho-so">Tra cứu tiến độ hồ sơ</a>
         <button class="btn secondary" type="button" data-logout>Đăng xuất</button>
       </div>
     </div>
-    <p class="muted" style="margin-top:1rem">DCC đang hoàn thiện cổng theo dõi hồ sơ chi tiết. Mọi thắc mắc, anh/chị liên hệ hotline/Zalo <b>076 778 7879</b>.</p>
+    <div id="lookupResult" class="lookup-result" data-auto="${(account.email || account.phone || account.code || '')}"></div>
+    <p class="muted" style="margin-top:var(--s4)">Mọi thắc mắc về hồ sơ, anh/chị liên hệ hotline/Zalo <b>076 778 7879</b>.</p>
   </div></section>`;
 }
 
@@ -583,7 +583,21 @@ function renderInternalApp() {
   return `<section class="page-hero"><div class="container"><p class="eyebrow">App nội bộ</p><h1>Trung tâm điều hành nội bộ DCC</h1><p>Phân quyền theo vai trò: admin, quản lý, nhân viên, giáo viên, đối tác và học viên — mỗi người chỉ thấy phần dữ liệu thuộc trách nhiệm của mình.</p><div class="hero-actions"><a class="btn primary" href="${(window.DCC_PUBLIC_CONFIG || {}).STAFF_APP_URL || 'https://app.deutschconnectcenter.com'}">Mở ứng dụng nội bộ</a></div></div></section><section class="section"><div class="container"><div class="role-grid">${['admin: xem và quản lý tất cả', 'manager: xem phần được giao', 'staff: xem khách/hồ sơ assign_to', 'teacher: lớp/học viên được phân công', 'partner: học viên do mình gửi', 'student/customer: hồ sơ của chính mình'].map((role) => `<span>${role}</span>`).join('')}</div><div class="module-grid">${MODULES.map(([title, text]) => `<article><h3>${title}</h3><p>${text}</p></article>`).join('')}</div></div></section>`;
 }
 
-function renderLookupPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Tra cứu hồ sơ</p><h1>Tra cứu tiến độ hồ sơ</h1><p>Nhập mã tra cứu DCC đã cấp, hoặc email / số điện thoại bạn dùng khi đăng ký để xem nhanh tình trạng hồ sơ.</p></div></section><section class="section"><div class="container narrow"><form class="lead-form"><label>Mã tra cứu / email / số điện thoại<input placeholder="DCC-2026-xxxxx"></label><button class="btn primary" type="button">Tra cứu</button><p class="muted">Để bảo mật, một số thông tin chi tiết chỉ hiển thị sau khi bạn đăng nhập tài khoản học viên.</p></form></div></section>`; }
+function renderLookupPage() {
+  const account = getAccount();
+  const prefill = account ? (account.email || account.phone || account.code || '') : '';
+  return `<section class="page-hero"><div class="container"><p class="eyebrow">Tra cứu hồ sơ</p><h1>Tra cứu tiến độ hồ sơ</h1><p>Nhập mã tra cứu DCC đã cấp, hoặc email / số điện thoại bạn dùng khi đăng ký để xem tiến độ từng hồ sơ.</p></div></section>
+  <section class="section"><div class="container narrow">
+    <form id="lookupForm" class="lead-form lookup-form">
+      <label>Mã tra cứu / Email / Số điện thoại
+        <input name="identifier" required value="${prefill}" placeholder="DCC-2026-xxxxx hoặc email / số điện thoại" />
+      </label>
+      <button class="btn primary" type="submit">Tra cứu tiến độ</button>
+      <p class="muted">Tra cứu hiển thị toàn bộ hồ sơ/chương trình bạn đã đăng ký với DCC và tiến độ của từng hồ sơ.</p>
+    </form>
+    <div id="lookupResult" class="lookup-result" data-auto="${prefill ? '1' : ''}"></div>
+  </div></section>`;
+}
 function renderAboutContact(path) { return `<section class="page-hero"><div class="container"><p class="eyebrow">${path === '/gioi-thieu' ? 'Giới thiệu' : 'Liên hệ'}</p><h1>Deutsch Connect Center</h1><p>Trung tâm hỗ trợ học tiếng Đức, tuyển sinh du học nghề, chuyển đổi văn bằng 18B/18A, Au-pair, thời vụ 8 tháng, hồ sơ visa và kết nối đối tác tại Đức.</p></div></section>${renderWhySection()}${renderRegisterSection()}`; }
 
 function bindInteractions() {
@@ -605,6 +619,9 @@ function bindInteractions() {
 
   // Đăng xuất (cổng đã đăng nhập)
   $$('[data-logout]').forEach((b) => b.addEventListener('click', () => { setAccount(null); renderPage(); }));
+
+  // Tra cứu tiến độ hồ sơ
+  bindLookup();
 
   $$('[data-scroll]').forEach((el) => el.addEventListener('click', (event) => {
     event.preventDefault();
@@ -692,6 +709,100 @@ async function submitAccountLogin(event, role) {
   } catch (error) {
     setMsg(error.message || 'Đăng nhập chưa thành công. Vui lòng thử lại.', 'error');
   }
+}
+
+// ===== Tra cứu tiến độ hồ sơ =====
+// 6 phần (mỗi phần gom một số "Giai đoạn hồ sơ" trong Notion).
+const PROFILE_SECTIONS = [
+  ['Đăng ký & tiếp nhận', ['Mới đăng ký']],
+  ['Tư vấn & kiểm tra điều kiện', ['Đã tư vấn']],
+  ['Học tiếng & hoàn thiện hồ sơ', ['Đang học tiếng', 'Đang hoàn thiện hồ sơ', 'Đã gửi đối tác']],
+  ['Phỏng vấn & hợp đồng', ['Chờ phỏng vấn', 'Đã có hợp đồng']],
+  ['Xin visa', ['Đang xử lý visa', 'Đã có visa']],
+  ['Sang Đức & hỗ trợ', ['Đã bay', 'Đang hỗ trợ sau bay']],
+];
+const STAGE_ORDER = ['Mới đăng ký', 'Đã tư vấn', 'Đang học tiếng', 'Đang hoàn thiện hồ sơ', 'Đã gửi đối tác', 'Chờ phỏng vấn', 'Đã có hợp đồng', 'Đang xử lý visa', 'Đã có visa', 'Đã bay', 'Đang hỗ trợ sau bay'];
+
+function sectionIndexOfStage(stage) {
+  const i = PROFILE_SECTIONS.findIndex(([, stages]) => stages.includes(stage));
+  return i < 0 ? 0 : i;
+}
+
+function formatVNDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d)) return '';
+  return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+async function profileApi(payload) {
+  const config = window.DCC_PUBLIC_CONFIG || {};
+  const endpoint = config.PROFILE_API || '/api/profile';
+  const response = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.ok) throw new Error(data.error || `Lỗi tra cứu (HTTP ${response.status})`);
+  return data;
+}
+
+function renderProgressDashboard(profile) {
+  if (!profile.found || !profile.records.length) {
+    return `<div class="lookup-empty">Chưa tìm thấy hồ sơ nào khớp thông tin này. Hãy kiểm tra lại mã/email/số điện thoại, hoặc <a class="text-link" href="#/dang-ky">đăng ký</a> nếu bạn chưa có hồ sơ.</div>`;
+  }
+  const head = `<div class="lookup-head"><h2>Hồ sơ của ${profile.name || 'bạn'}</h2><p class="muted">${profile.records.length} hồ sơ/chương trình đã đăng ký với DCC</p></div>`;
+  return head + profile.records.map(renderProfileCard).join('');
+}
+
+function renderProfileCard(rec) {
+  const stage = rec.stage || 'Mới đăng ký';
+  const stageIdx = Math.max(0, STAGE_ORDER.indexOf(stage));
+  const curSection = sectionIndexOfStage(stage);
+  const isFinal = stageIdx >= STAGE_ORDER.length - 1;
+  const percent = Math.round(((stageIdx + 1) / STAGE_ORDER.length) * 100);
+  const steps = PROFILE_SECTIONS.map(([title], idx) => {
+    let cls = 'pending';
+    if (isFinal || idx < curSection) cls = 'done';
+    else if (idx === curSection) cls = 'current';
+    return `<li class="prog-step ${cls}"><span class="ps-dot">${cls === 'done' ? '✓' : idx + 1}</span><span class="ps-label">${title}</span></li>`;
+  }).join('');
+  const meta = [
+    rec.level && `Tiếng Đức: ${rec.level}`,
+    rec.location && `Nơi ở: ${rec.location}`,
+    rec.code && `Mã: ${rec.code}`,
+    rec.date && `Đăng ký: ${formatVNDate(rec.date)}`,
+  ].filter(Boolean).map((m) => `<span>${m}</span>`).join('');
+  return `<article class="profile-card">
+    <div class="pc-head">
+      <div><span class="pc-source">${rec.source}</span><h3>${rec.program}</h3></div>
+      <span class="pc-stage">${stage}</span>
+    </div>
+    <div class="pc-bar"><span style="width:${percent}%"></span></div>
+    <div class="pc-percent">${isFinal ? 'Hoàn tất 100%' : `Tiến độ ${percent}%`}</div>
+    <ol class="prog-steps">${steps}</ol>
+    ${meta ? `<div class="pc-meta">${meta}</div>` : ''}
+  </article>`;
+}
+
+async function loadProfile(identifier, container) {
+  if (!container) return;
+  container.innerHTML = `<div class="lookup-loading">Đang tải tiến độ hồ sơ…</div>`;
+  try {
+    const profile = await profileApi({ identifier });
+    container.innerHTML = renderProgressDashboard(profile);
+  } catch (error) {
+    container.innerHTML = `<div class="lookup-empty">Hiện chưa tra cứu được. Vui lòng thử lại, hoặc liên hệ hotline/Zalo <b>076 778 7879</b>.</div>`;
+  }
+}
+
+function bindLookup() {
+  const form = $('#lookupForm');
+  if (form) form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const identifier = (new FormData(form).get('identifier') || '').toString().trim();
+    if (identifier) loadProfile(identifier, $('#lookupResult'));
+  });
+  // Tự tải nếu đã có thông tin (đã đăng nhập hoặc đã điền sẵn ô tra cứu).
+  const result = $('#lookupResult');
+  if (result && result.dataset.auto) loadProfile(result.dataset.auto, result);
 }
 
 function bindWishForm(form) {
