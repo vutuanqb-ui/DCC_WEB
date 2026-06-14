@@ -161,6 +161,10 @@ function go(path) {
 function renderPage() {
   const path = slugPath();
   const root = $('#appRoot');
+  // Đổi trang thì đóng overlay menu (nếu đang mở).
+  document.body.classList.remove('nav-open');
+  $('.nav-links')?.classList.remove('open');
+  $('.menu-toggle')?.setAttribute('aria-expanded', 'false');
   if (path.startsWith('/don-hang/')) {
     root.innerHTML = renderOrderDetail(path.split('/').pop());
   } else if (path === '/' || path === '') {
@@ -197,42 +201,112 @@ function sectionHeader(eyebrow, title, text = '') {
   return `<div class="section-head"><div><p class="eyebrow">${eyebrow}</p><h2>${title}</h2></div>${text ? `<p class="muted section-copy">${text}</p>` : ''}</div>`;
 }
 
+// ===== Trang chủ — bản nhận diện thương hiệu (brand experience) =====
+// Trang chủ KHÔNG đổ nội dung các mục menu. Đây là một "phân cảnh" thương hiệu
+// điện ảnh, tối giản, 3D — thể hiện tiêu chí hành động & làm việc của DCC.
+const BX_PRINCIPLES = [
+  ['✶', 'Minh bạch tuyệt đối', 'Chi phí, rủi ro và tiến độ hồ sơ đều rõ ràng từ đầu. Bạn luôn biết mình đang ở đâu trên lộ trình.'],
+  ['◈', 'Trách nhiệm đến cùng', 'Đồng hành từ buổi tư vấn đầu tiên cho tới khi bạn ổn định cuộc sống và công việc trên đất Đức.'],
+  ['❖', 'Đúng diện, đúng người', 'Tư vấn theo đúng năng lực thật — không vẽ kỳ vọng sai, không ép chọn sai diện để chốt hồ sơ.'],
+  ['✦', 'Tận tâm như người nhà', 'Mỗi học viên là một câu chuyện riêng. DCC lắng nghe và lo từng bước cùng bạn, không bỏ sót ai.'],
+];
+
 function renderHome() {
   return `
-    <section class="hero">
-      <div class="container hero-grid">
-        <div class="hero-content">
-          <p class="eyebrow">Cầu nối Việt Nam – Đức</p>
-          <h1 data-i18n-html="hero-main">Hành trình sang Đức <em>rõ ràng</em>, hồ sơ <em>minh bạch</em>, tương lai <em>vững vàng</em>.</h1>
-          <p class="hero-text">Deutsch Connect Center đồng hành cùng bạn trọn hành trình: học tiếng Đức, du học nghề, chuyển đổi văn bằng 18B/18A, Au-pair, thời vụ, hồ sơ visa và kết nối việc làm tại Đức.</p>
-          <div class="hero-actions">
-            <a class="btn primary" href="#/don-hang">Đăng ký tư vấn ngay</a>
-            <a class="btn secondary" href="#/dang-ky">Đăng ký tài khoản</a>
-            <a class="btn ghost" href="#/tra-cuu-ho-so">Tra cứu tiến độ hồ sơ</a>
+    <section class="bx-hero" aria-label="Deutsch Connect Center">
+      <div class="bx-aurora" aria-hidden="true"></div>
+      <div class="bx-particles" aria-hidden="true">${Array.from({ length: 26 }).map((_, i) => {
+        const x = (i * 67) % 100;          // rải ngang giả ngẫu nhiên
+        const y = (i * 41 + 13) % 100;     // rải dọc
+        const dur = 7 + ((i * 13) % 9);    // 7–15s
+        const delay = -((i * 7) % 14);     // lệch pha
+        const sc = (0.5 + ((i * 17) % 60) / 60).toFixed(2);
+        return `<i style="left:${x}%;top:${y}%;--dur:${dur}s;animation-delay:${delay}s;--sc:${sc}"></i>`;
+      }).join('')}</div>
+      <div class="container bx-hero-grid">
+        <div class="bx-hero-copy">
+          <p class="bx-eyebrow">Deutsch Connect Center · Cầu nối Việt Nam – Đức</p>
+          <h1 class="bx-title">Đưa người Việt đến nước Đức — bằng sự <em>minh bạch</em> và <em>tận tâm</em>.</h1>
+          <p class="bx-lead">Không lời hứa hão. Chỉ một lộ trình rõ ràng, một hồ sơ minh bạch và một đội ngũ đồng hành đến khi bạn thật sự vững vàng trên đất Đức.</p>
+          <div class="bx-actions">
+            <a class="btn primary bx-btn-lg" href="#/don-hang">Bắt đầu hành trình</a>
+            <a class="btn bx-btn-line" href="#/chuong-trinh">Khám phá chương trình</a>
           </div>
-          <div class="trust-row">
-            <span>Du học nghề</span><span>18B/18A</span><span>Au-pair</span><span>Thời vụ 8 tháng</span><span>A1-B2</span>
-          </div>
+          <div class="bx-trust">Du học nghề · 18B / 18A · Au-pair · Thời vụ 8 tháng · Học tiếng A1–B2</div>
         </div>
-        <div class="hero-visual" aria-label="Hình ảnh nước Đức và tiến độ hồ sơ">
-          <div class="visual-photo"></div>
-          <div class="visual-card main-card">
-            <div class="mc-head"><span class="status-dot"></span> Hồ sơ của bạn</div>
-            <strong>Đang xử lý visa</strong>
-            <div class="mc-progress"><span></span></div>
-            <small>3 giấy tờ cần bổ sung trong tuần</small>
+
+        <div class="bx-stage" aria-hidden="true">
+          <div class="bx-orbit bx-orbit-1"></div>
+          <div class="bx-orbit bx-orbit-2"></div>
+          <div class="bx-orbit bx-orbit-3"></div>
+          <div class="bx-medallion">
+            <div class="bx-medallion-face">
+              <span class="bx-mono">DCC</span>
+              <span class="bx-mono-sub">Deutsch Connect Center</span>
+              <span class="bx-mono-est">Est. Việt Nam</span>
+            </div>
+            <div class="bx-medallion-glare"></div>
           </div>
-          <div class="stats-card"><strong>5</strong><span>chương trình: du học nghề, 18B/18A, Au-pair, thời vụ, học tiếng</span></div>
-          <div class="live-pill"><span class="live-dot"></span> Theo dõi tiến độ online</div>
+          <div class="bx-chip bx-chip-1"><span class="bx-chip-dot"></span> Minh bạch</div>
+          <div class="bx-chip bx-chip-2"><span class="bx-chip-dot"></span> Đồng hành</div>
+          <div class="bx-chip bx-chip-3"><span class="bx-chip-dot"></span> Đúng diện</div>
+        </div>
+      </div>
+      <a class="bx-scroll-cue" href="#bx-manifesto"><span>Cuộn để khám phá</span><i></i></a>
+    </section>
+
+    <section class="bx-manifesto reveal" id="bx-manifesto">
+      <div class="container">
+        <div class="bx-section-head">
+          <p class="bx-kicker">Kim chỉ nam</p>
+          <h2>Tiêu chí hành động của DCC</h2>
+          <p class="bx-section-lead">Bốn nguyên tắc làm nên một thương hiệu uy tín — được giữ trọn trong từng hồ sơ, từng cuộc gọi, từng người Việt mà DCC đồng hành.</p>
+        </div>
+        <div class="bx-principles">
+          ${BX_PRINCIPLES.map(([icon, title, text], i) => `
+            <article class="bx-principle reveal" style="--d:${i * 90}ms">
+              <div class="bx-principle-inner">
+                <span class="bx-principle-icon">${icon}</span>
+                <span class="bx-principle-no">0${i + 1}</span>
+                <h3>${title}</h3>
+                <p>${text}</p>
+              </div>
+            </article>`).join('')}
         </div>
       </div>
     </section>
-    ${renderProgramsSection()}
-    ${renderWishSection()}
-    ${renderProcessSection()}
-    ${renderRisksSection(true)}
-    ${renderWhySection()}
-    ${renderRegisterSection()}
+
+    <section class="bx-bridge reveal">
+      <div class="bx-aurora bx-aurora-soft" aria-hidden="true"></div>
+      <div class="container bx-bridge-inner">
+        <p class="bx-kicker bx-kicker-light">Cầu nối Việt Nam – Đức</p>
+        <h2 class="bx-bridge-title">Một cây cầu vững chãi giữa hai bờ — nơi <em>ước mơ</em> gặp <em>cơ hội</em>.</h2>
+        <div class="bx-bridge-arc" aria-hidden="true">
+          <span class="bx-bridge-end bx-bridge-vn">Việt Nam</span>
+          <svg viewBox="0 0 600 120" preserveAspectRatio="none"><path class="bx-arc-path" d="M40 100 Q300 -30 560 100"/></svg>
+          <span class="bx-bridge-end bx-bridge-de">Đức</span>
+          <span class="bx-bridge-traveler"></span>
+        </div>
+        <div class="bx-bridge-stats">
+          <div><strong>5</strong><span>chương trình sang Đức</span></div>
+          <div><strong>A1–B2</strong><span>lộ trình học tiếng</span></div>
+          <div><strong>100%</strong><span>hồ sơ minh bạch</span></div>
+          <div><strong>Online</strong><span>tra cứu tiến độ mọi lúc</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="bx-cta reveal">
+      <div class="container bx-cta-inner">
+        <p class="bx-kicker">Sẵn sàng?</p>
+        <h2>Hành trình sang Đức của bạn <em>bắt đầu hôm nay</em>.</h2>
+        <p class="bx-cta-lead">Để lại thông tin, DCC sẽ tư vấn miễn phí và đúng diện cho bạn — minh bạch ngay từ cuộc gọi đầu tiên.</p>
+        <div class="bx-actions bx-actions-center">
+          <a class="btn primary bx-btn-lg" href="#/don-hang">Đăng ký tư vấn miễn phí</a>
+          <a class="btn bx-btn-line bx-btn-line-dark" href="#/tra-cuu-ho-so">Tra cứu tiến độ hồ sơ</a>
+        </div>
+      </div>
+    </section>
   `;
 }
 
@@ -767,6 +841,48 @@ function bindInteractions() {
     const target = document.getElementById(el.dataset.scroll);
     if (target) target.scrollIntoView({ behavior: 'smooth' });
   }));
+
+  bindHomeExperience();
+}
+
+// Hiệu ứng trang chủ: nghiêng huy hiệu theo chuột + lộ dần khi cuộn.
+function bindHomeExperience() {
+  const stage = $('.bx-stage');
+  const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // Nghiêng 3D theo con trỏ (chỉ trên thiết bị có chuột, không reduce-motion).
+  if (stage && !reduce && window.matchMedia('(pointer: fine)').matches) {
+    const hero = $('.bx-hero');
+    hero.addEventListener('pointermove', (e) => {
+      const r = hero.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      stage.style.setProperty('--rx', `${(-py * 14).toFixed(2)}deg`);
+      stage.style.setProperty('--ry', `${(px * 18).toFixed(2)}deg`);
+      stage.style.setProperty('--mx', `${(px * 26).toFixed(1)}px`);
+      stage.style.setProperty('--my', `${(py * 26).toFixed(1)}px`);
+    });
+    hero.addEventListener('pointerleave', () => {
+      stage.style.setProperty('--rx', '0deg');
+      stage.style.setProperty('--ry', '0deg');
+      stage.style.setProperty('--mx', '0px');
+      stage.style.setProperty('--my', '0px');
+    });
+  }
+
+  // Lộ dần các phân cảnh khi cuộn tới.
+  const reveals = $$('.reveal');
+  if (!reveals.length) return;
+  if (reduce || !('IntersectionObserver' in window)) {
+    reveals.forEach((el) => el.classList.add('in'));
+    return;
+  }
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) { entry.target.classList.add('in'); io.unobserve(entry.target); }
+    });
+  }, { threshold: 0.16, rootMargin: '0px 0px -8% 0px' });
+  reveals.forEach((el) => io.observe(el));
 }
 
 // ===== Tài khoản (đăng ký / đăng nhập có mật khẩu) =====
@@ -1130,22 +1246,28 @@ async function submitLeadToNotion(payload) {
   return data;
 }
 
-$('.menu-toggle')?.addEventListener('click', (event) => {
+function setMenuOpen(open) {
   const nav = $('.nav-links');
-  const open = nav.classList.toggle('open');
-  event.currentTarget.setAttribute('aria-expanded', open);
-  // Nhãn/icon nút menu để DCC_I18N.apply() cập nhật theo ngôn ngữ + trạng thái mở.
+  if (!nav) return;
+  nav.classList.toggle('open', open);
+  document.body.classList.toggle('nav-open', open);
+  $('.menu-toggle')?.setAttribute('aria-expanded', String(open));
   if (window.DCC_I18N) DCC_I18N.apply();
+}
+
+$('.menu-toggle')?.addEventListener('click', () => {
+  setMenuOpen(!$('.nav-links')?.classList.contains('open'));
 });
 
-// Bấm chọn 1 mục trong menu mobile thì tự đóng lại.
+// Bấm chọn 1 mục trong menu (overlay) thì tự đóng lại.
 $('.nav-links')?.addEventListener('click', (event) => {
   if (!event.target.closest('a')) return;
-  const nav = $('.nav-links');
-  if (!nav.classList.contains('open')) return;
-  nav.classList.remove('open');
-  $('.menu-toggle')?.setAttribute('aria-expanded', 'false');
-  if (window.DCC_I18N) DCC_I18N.apply();
+  if ($('.nav-links')?.classList.contains('open')) setMenuOpen(false);
+});
+
+// Đóng overlay bằng phím Esc.
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && $('.nav-links')?.classList.contains('open')) setMenuOpen(false);
 });
 
 window.addEventListener('hashchange', renderPage);
