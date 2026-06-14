@@ -1249,6 +1249,7 @@ async function submitAccountRegister(event, role, msgSelector) {
     setAccount({ role: result.role, name: result.name, code: result.code, email: (payload.email || '').toLowerCase(), phone: payload.phone });
     form.reset();
     setMsg(`🎉 Tạo tài khoản thành công! ${role === 'partner' ? 'Mã đối tác' : 'Mã thành viên'} của bạn: ${result.code}. Đang chuyển tới cổng đăng nhập...`, 'success');
+    if (window.dccTrack) dccTrack('CompleteRegistration', { content_name: role === 'partner' ? 'Đăng ký đối tác' : 'Đăng ký học viên' });
     setTimeout(() => go('/hoc-vien'), 1400);
   } catch (error) {
     setMsg(error.message || 'Chưa tạo được tài khoản. Vui lòng thử lại.', 'error');
@@ -1410,6 +1411,7 @@ async function submitWish(event) {
     const block18 = $('[data-wish-18]', form);
     if (block18) block18.hidden = true;
     setMsg(`Cảm ơn anh/chị! DCC đã nhận nguyện vọng và sẽ liên hệ tư vấn sớm. Mã tra cứu của bạn: ${payload.lookup_code}`, 'success');
+    if (window.dccTrack) dccTrack('Lead', { content_name: 'Đăng ký nguyện vọng tư vấn' });
   } catch (error) {
     console.error(error);
     setMsg('Hiện chưa gửi được. Anh/chị vui lòng thử lại, hoặc liên hệ hotline/Zalo 076 778 7879 để được hỗ trợ nhanh.', 'error');
@@ -1483,6 +1485,7 @@ async function submitJobTransfer(event) {
     form.reset();
     const fileMsg = data.files_uploaded ? ` Đã nhận ${data.files_uploaded} file hồ sơ.` : '';
     setMsg(`Cảm ơn bạn! DCC đã nhận nguyện vọng chuyển việc và sẽ liên hệ qua WhatsApp sớm.${fileMsg} Mã tra cứu: ${payload.lookup_code}`, 'success');
+    if (window.dccTrack) dccTrack('Lead', { content_name: 'Chuyển việc, chuyển chủ tại Đức' });
   } catch (error) {
     console.error(error);
     setMsg('Hiện chưa gửi được. Vui lòng thử lại, hoặc liên hệ hotline/Zalo/WhatsApp 076 778 7879 để được hỗ trợ.', 'error');
