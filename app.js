@@ -179,6 +179,8 @@ function renderPage() {
     root.innerHTML = renderLookupPage();
   } else if (path === '/rui-ro-can-biet' || path === '/ruxuiro-can-biet') {
     root.innerHTML = renderRisksPage();
+  } else if (path === '/chuyen-viec-chuyen-chu' || path === '/chuyen-viec') {
+    root.innerHTML = renderJobTransferPage();
   } else if (path === '/quy-trinh-ho-so') {
     root.innerHTML = renderProcessPage();
   } else if (path === '/gioi-thieu' || path === '/lien-he') {
@@ -346,6 +348,157 @@ function renderProcessSection() {
   return `<section class="section process-section" id="process"><div class="container">${sectionHeader('Quy trình', 'Sáu bước, từ đăng ký đến khi ổn định tại Đức', 'Một lộ trình thống nhất để bạn luôn biết hồ sơ đang ở đâu và bước tiếp theo cần làm gì.')}
     <div class="timeline">${PROCESS_STEPS.map(([no, title, text]) => `<article><span>${no}</span><h3>${title}</h3><p>${text}</p></article>`).join('')}</div>
   </div></section>`;
+}
+
+// ===== Chuyển việc / chuyển chủ tại Đức (dành cho người đang ở Đức) =====
+// Nghề có thể chuyển theo từng diện. Azubi dùng danh mục nghề Ausbildung; 18A/18B dùng danh mục tay nghề.
+const TRANSFER_CAREERS = {
+  'Azubi': GERMANY_CAREERS['Du học nghề Đức'],
+  '18A': GERMANY_CAREERS['Chuyển đổi văn bằng 18B/18A'],
+  '18B': GERMANY_CAREERS['Chuyển đổi văn bằng 18B/18A'],
+};
+
+const TRANSFER_TRACKS = [
+  {
+    tag: 'Azubi',
+    icon: '🎓',
+    title: 'Dành cho bạn đang là Azubi',
+    sub: 'Đang học nghề (Ausbildung) muốn ĐỔI CHỦ (Betrieb), đổi nghề học mới hoặc chuyển sang thành phố/bang khác.',
+    when: [
+      'Môi trường học nghề hiện tại không phù hợp, bị chèn ép hoặc ít được dạy nghề thật.',
+      'Muốn đổi sang nghề học khác đúng sở thích, đúng năng lực hơn.',
+      'Muốn chuyển tới thành phố/bang có thu nhập, cộng đồng hoặc cơ hội tốt hơn.',
+    ],
+    support: [
+      'Rà soát hợp đồng đào tạo & thời điểm được phép chuyển (Probezeit, thoả thuận chấm dứt).',
+      'Tìm Betrieb mới nhận tiếp nhận Azubi đúng nghề, đúng khu vực bạn muốn.',
+      'Hỗ trợ hồ sơ chuyển trường nghề (Berufsschule) và thủ tục với Ausländerbehörde.',
+    ],
+    careers: GERMANY_CAREERS['Du học nghề Đức'],
+  },
+  {
+    tag: '18A / 18B',
+    icon: '📘',
+    title: 'Dành cho lao động diện 18A / 18B',
+    sub: '§18a (bằng nghề) và §18b (bằng đại học) muốn ĐỔI CHỦ, đổi hợp đồng lao động hoặc chuyển vùng làm việc.',
+    when: [
+      'Hết hạn hoặc không hài lòng với hợp đồng lao động hiện tại.',
+      'Có cơ hội việc làm mới với mức lương, vị trí hoặc ngành phù hợp hơn.',
+      'Muốn chuyển tới bang/thành phố khác để gần gia đình hoặc cộng đồng người Việt.',
+    ],
+    support: [
+      'Đánh giá điều kiện đổi chủ theo Luật Nhập cư (đổi chủ, đổi ngành cần lưu ý gì).',
+      'Kết nối nhà tuyển dụng Đức và chuẩn bị hợp đồng lao động mới phù hợp diện 18a/18b.',
+      'Hỗ trợ thủ tục công nhận văn bằng (KMK/ZAB, NARIC) nếu chuyển ngành và cập nhật visa/giấy phép cư trú.',
+    ],
+    careers: GERMANY_CAREERS['Chuyển đổi văn bằng 18B/18A'],
+  },
+];
+
+function renderTransferTrack(track) {
+  return `<article class="track-card">
+    <div class="track-head"><span class="track-icon">${track.icon}</span><div><span class="track-tag">${track.tag}</span><h3>${track.title}</h3></div></div>
+    <p class="track-sub">${track.sub}</p>
+    <h4>Khi nào nên chuyển?</h4>
+    <ul class="track-list">${track.when.map((t) => `<li>${t}</li>`).join('')}</ul>
+    <h4>DCC hỗ trợ bạn</h4>
+    <ul class="track-list">${track.support.map((t) => `<li>${t}</li>`).join('')}</ul>
+    <h4>Một số nghề có thể chuyển</h4>
+    <div class="track-careers">${track.careers.map((c) => `<span>${c}</span>`).join('')}</div>
+    <a class="btn secondary full" href="#transferForm" data-scroll="transferForm">Đăng ký chuyển ${track.tag}</a>
+  </article>`;
+}
+
+function renderTransferOptions() {
+  // option mặc định + 2 nhóm ngành (Azubi / tay nghề) cho ô "nghề mong muốn".
+  const azubi = GERMANY_CAREERS['Du học nghề Đức'];
+  const skilled = GERMANY_CAREERS['Chuyển đổi văn bằng 18B/18A'];
+  return `<option value="">— Chọn nghề / công việc —</option>
+    <optgroup label="Nghề học (Azubi)">${azubi.map((c) => `<option>${c}</option>`).join('')}</optgroup>
+    <optgroup label="Tay nghề (18A / 18B)">${skilled.map((c) => `<option>${c}</option>`).join('')}</optgroup>
+    <option value="Nghề khác">Nghề khác (ghi rõ ở ghi chú)</option>`;
+}
+
+function renderJobTransferForm() {
+  return `
+    <section class="section wish-section" id="transferForm">
+      <div class="container">
+        ${sectionHeader('Đăng ký chuyển việc', 'Gửi nguyện vọng & hồ sơ chuyển việc tại Đức', 'Cho DCC biết bạn đang ở diện nào, muốn chuyển đến đâu và làm nghề gì. Bạn có thể gửi kèm hồ sơ/CV để DCC tư vấn nhanh và chính xác hơn.')}
+        <form id="jobTransferForm" class="lead-form wish-form" novalidate>
+          <div class="wish-grid">
+            <label>Bạn đang ở diện nào? *
+              <select name="dien" data-transfer-dien required>
+                <option value="">— Chọn diện hiện tại —</option>
+                <option value="Azubi">Azubi (đang học nghề)</option>
+                <option value="18A">18A (bằng nghề)</option>
+                <option value="18B">18B (bằng đại học)</option>
+              </select>
+            </label>
+            <label>Nghề / ngành hiện tại
+              <input name="current_career" placeholder="Ví dụ: Điều dưỡng, Nhà hàng – khách sạn…" />
+            </label>
+            <label>Nghề / công việc mong muốn chuyển sang
+              <select name="desired_career">${renderTransferOptions()}</select>
+            </label>
+            <label>Bang / thành phố ĐANG Ở
+              <select name="current_location">${renderGermanyOptions()}</select>
+            </label>
+            <label>Bang / thành phố MUỐN CHUYỂN TỚI
+              <select name="desired_location">${renderGermanyOptions()}</select>
+            </label>
+            <label>Trình độ tiếng Đức hiện tại
+              <select name="german_level"><option>Chưa học</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option></select>
+            </label>
+            <label>Thời gian mong muốn chuyển
+              <input name="desired_time" placeholder="Ví dụ: ngay khi có chỗ, sau 3 tháng…" />
+            </label>
+            <label>Họ và tên *
+              <input name="full_name" required placeholder="Nguyễn Văn A" />
+            </label>
+            <label>Số WhatsApp *
+              <input name="whatsapp" required placeholder="+49 1xx xxxxxxx" />
+            </label>
+            <label>Số điện thoại / Zalo khác
+              <input name="other_phone" placeholder="(không bắt buộc)" />
+            </label>
+            <label>Email
+              <input name="email" type="email" placeholder="email@example.com" />
+            </label>
+            <label class="wish-note">Lý do muốn chuyển việc / chuyển chủ
+              <textarea name="reason" rows="2" placeholder="Mô tả ngắn tình huống hiện tại và mong muốn của bạn…"></textarea>
+            </label>
+            <div class="wish-note transfer-docs" data-transfer-docs>
+              <p class="wish-subhead">📎 Gửi hồ sơ của bạn (DCC nhận hồ sơ tại Đức)</p>
+              <div class="wish-subgrid">
+                <label>Link hồ sơ / CV (Google Drive, Dropbox…)
+                  <input name="doc_link" placeholder="https://drive.google.com/..." />
+                </label>
+                <label>Hoặc tải file lên (CV, hợp đồng, bằng cấp…)
+                  <input type="file" name="files" data-transfer-files multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.heic,.webp" />
+                </label>
+              </div>
+              <p class="muted transfer-hint">Tối đa 3 file, tổng dưới ~3MB. File lớn hơn vui lòng gửi qua link Drive hoặc WhatsApp. Hồ sơ chỉ dùng để tư vấn, được bảo mật.</p>
+            </div>
+            <label class="wish-note">Ghi chú thêm
+              <textarea name="note" rows="2" placeholder="Mong muốn cụ thể về chủ mới, mức lương, khu vực…"></textarea>
+            </label>
+          </div>
+          <div class="wish-actions">
+            <button class="btn primary" type="submit">Gửi nguyện vọng & hồ sơ chuyển việc</button>
+            <span class="secure-inline">🔒 Thông tin & hồ sơ được bảo mật, chỉ dùng để tư vấn chuyển việc phù hợp.</span>
+          </div>
+          <p id="transferMessage" class="form-message" role="status"></p>
+        </form>
+      </div>
+    </section>`;
+}
+
+function renderJobTransferPage() {
+  return `<section class="page-hero"><div class="container"><p class="eyebrow">Đang sống & làm việc tại Đức?</p><h1>Chuyển việc, chuyển chủ & đổi nghề tại Đức</h1><p>DCC đồng hành cùng các bạn đang ở Đức tìm một công việc mới, một nghề học mới hoặc một người chủ phù hợp hơn — đúng ngành, đúng thành phố và tiểu bang bạn mong muốn.</p><div class="hero-actions"><a class="btn primary" href="#transferForm" data-scroll="transferForm">Đăng ký chuyển việc</a><a class="btn secondary" href="#tracks" data-scroll="tracks">Xem cho Azubi & 18A/18B</a></div></div></section>
+    <section class="section" id="tracks"><div class="container">${sectionHeader('Hai nhóm hỗ trợ', 'Bạn thuộc nhóm nào?', 'DCC chia rõ hai lộ trình để hỗ trợ đúng tình huống pháp lý và đúng nhu cầu của bạn.')}
+      <div class="track-grid">${TRANSFER_TRACKS.map(renderTransferTrack).join('')}</div>
+    </div></section>
+    ${renderJobTransferForm()}`;
 }
 
 function renderRisksSection(short = false) {
@@ -585,6 +738,9 @@ function renderAboutContact(path) { return `<section class="page-hero"><div clas
 function bindInteractions() {
   const wishForm = $('#wishForm');
   if (wishForm) bindWishForm(wishForm);
+
+  const transferForm = $('#jobTransferForm');
+  if (transferForm) bindJobTransferForm(transferForm);
 
   const form = $('#leadForm');
   if (form) bindLeadForm(form);
@@ -832,6 +988,78 @@ async function submitWish(event) {
   } catch (error) {
     console.error(error);
     setMsg('Hiện chưa gửi được. Anh/chị vui lòng thử lại, hoặc liên hệ hotline/Zalo 076 778 7879 để được hỗ trợ nhanh.', 'error');
+  }
+}
+
+function bindJobTransferForm(form) {
+  const dienSel = $('[data-transfer-dien]', form);
+  const careerSel = form.querySelector('[name="desired_career"]');
+  const syncCareers = () => {
+    const list = TRANSFER_CAREERS[dienSel.value];
+    if (!careerSel) return;
+    if (list && list.length) {
+      careerSel.innerHTML = '<option value="">— Chọn nghề / công việc —</option>' +
+        list.map((c) => `<option>${c}</option>`).join('') +
+        '<option value="Nghề khác">Nghề khác (ghi rõ ở ghi chú)</option>';
+    } else {
+      careerSel.innerHTML = renderTransferOptions();
+    }
+  };
+  dienSel.addEventListener('change', syncCareers);
+  form.addEventListener('submit', submitJobTransfer);
+}
+
+// Đọc 1 file thành base64 (bỏ tiền tố data:...;base64,).
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve({ name: file.name, type: file.type, data: String(reader.result).split(',').pop() });
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
+async function submitJobTransfer(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const msg = $('#transferMessage');
+  const setMsg = (text, type = '') => { if (msg) { msg.textContent = text; msg.className = `form-message ${type}`; } };
+  const payload = Object.fromEntries(new FormData(form).entries());
+  if (!payload.dien) { setMsg('Vui lòng chọn diện hiện tại của bạn (Azubi / 18A / 18B).', 'error'); return; }
+  if (!payload.full_name || !payload.whatsapp) { setMsg('Vui lòng điền họ tên và số WhatsApp để DCC liên hệ lại.', 'error'); return; }
+
+  // Đọc file hồ sơ (nếu có) — tối đa 3 file, tổng dưới ~3MB.
+  const fileInput = $('[data-transfer-files]', form);
+  const files = fileInput && fileInput.files ? Array.from(fileInput.files).slice(0, 3) : [];
+  const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+  if (totalBytes > 3 * 1024 * 1024) {
+    setMsg('Tổng dung lượng file vượt ~3MB. Vui lòng gửi file nhỏ hơn hoặc dán link Google Drive vào ô "Link hồ sơ / CV".', 'error');
+    return;
+  }
+
+  payload.source = 'Website – Chuyển việc/chuyển chủ';
+  payload.lookup_code = `DCC-CV-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  delete payload.files; // file lấy từ input, không lấy từ FormData text.
+
+  try {
+    setMsg(files.length ? 'Đang tải hồ sơ và gửi đăng ký...' : 'Đang gửi đăng ký...', '');
+    payload.files = await Promise.all(files.map(readFileAsBase64));
+    const config = window.DCC_PUBLIC_CONFIG || {};
+    const endpoint = config.JOB_TRANSFER_API || '/api/job-transfer';
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) throw new Error(data.error || `HTTP ${response.status}`);
+    if (data.lookup_code) payload.lookup_code = data.lookup_code;
+    form.reset();
+    const fileMsg = data.files_uploaded ? ` Đã nhận ${data.files_uploaded} file hồ sơ.` : '';
+    setMsg(`Cảm ơn bạn! DCC đã nhận nguyện vọng chuyển việc và sẽ liên hệ qua WhatsApp sớm.${fileMsg} Mã tra cứu: ${payload.lookup_code}`, 'success');
+  } catch (error) {
+    console.error(error);
+    setMsg('Hiện chưa gửi được. Vui lòng thử lại, hoặc liên hệ hotline/Zalo/WhatsApp 076 778 7879 để được hỗ trợ.', 'error');
   }
 }
 

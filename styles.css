@@ -295,6 +295,25 @@ p:last-child { margin-bottom: 0; }
 @media (max-width: 860px) { .wish-grid { grid-template-columns: 1fr 1fr; } .wish-form { padding: var(--s4); } .wish-actions .btn { width: 100%; min-width: 0; } }
 @media (max-width: 560px) { .wish-grid, .wish-subgrid { grid-template-columns: 1fr; } }
 
+/* ===== Chuyển việc / chuyển chủ tại Đức ===== */
+.track-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4); }
+.track-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s4); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }
+.track-head { display: flex; align-items: center; gap: var(--s3); margin-bottom: var(--s3); }
+.track-icon { width: 52px; height: 52px; flex: 0 0 auto; display: grid; place-items: center; font-size: 26px; border-radius: var(--r-md); background: var(--gold-soft); border: 1px solid var(--line); }
+.track-tag { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+.track-card h3 { margin: 2px 0 0; }
+.track-card h4 { margin: var(--s3) 0 var(--s1); font-size: 14px; color: var(--navy); }
+.track-sub { color: var(--muted); }
+.track-list { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
+.track-list li { color: var(--ink); }
+.track-careers { display: flex; flex-wrap: wrap; gap: 7px; }
+.track-careers span { font-size: 12.5px; padding: 5px 11px; border-radius: var(--r-pill); background: var(--gold-soft); border: 1px solid var(--line); color: var(--amber); font-weight: 500; }
+.track-card .btn.full { margin-top: var(--s3); }
+.transfer-docs { padding: var(--s3) var(--s4) var(--s4); border: 1px dashed var(--gold); border-radius: var(--r-md); background: var(--gold-soft); }
+.transfer-docs input[type="file"] { padding: 10px 0; }
+.transfer-hint { margin-top: var(--s2); font-size: 13px; }
+@media (max-width: 860px) { .track-grid { grid-template-columns: 1fr; } }
+
 /* ---------- Cổng đăng nhập / đăng ký ---------- */
 .login-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4); align-items: stretch; }
 .login-card { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s5); box-shadow: var(--shadow-sm); display: flex; flex-direction: column; }

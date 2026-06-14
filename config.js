@@ -6,5 +6,8 @@ window.DCC_PUBLIC_CONFIG = {
   // Không cần điền gì ở đây trừ khi đổi đường dẫn API.
   LEAD_API: "/api/lead",
 
+  // Nhận hồ sơ "Chuyển việc / chuyển chủ tại Đức" (Azubi & 18A/18B) → /api/job-transfer.
+  JOB_TRANSFER_API: "/api/job-transfer",
+
   STAFF_APP_URL: "https://app.deutschconnectcenter.com"
 };
