@@ -312,6 +312,23 @@ function renderWishSection() {
             <label>Tỉnh/thành (tại Việt Nam)
               <input name="province" placeholder="Ví dụ: Quảng Trị" />
             </label>
+            <div class="wish-18 wish-note" data-wish-18 hidden>
+              <p class="wish-subhead">Thông tin công nhận văn bằng (18A / 18B)</p>
+              <div class="wish-subgrid">
+                <label>Đã làm KMK / ZAB chưa?
+                  <select name="kmk_zab"><option value="">— Chọn —</option><option>Chưa làm</option><option>Đang làm</option><option>Đã có kết quả</option></select>
+                </label>
+                <label>KMK / ZAB — đã làm bao lâu rồi?
+                  <input name="kmk_zab_time" placeholder="Ví dụ: 3 tháng" />
+                </label>
+                <label>Đã làm NARIC chưa?
+                  <select name="naric"><option value="">— Chọn —</option><option>Chưa làm</option><option>Đang làm</option><option>Đã có kết quả</option></select>
+                </label>
+                <label>NARIC — đã làm bao lâu rồi?
+                  <input name="naric_time" placeholder="Ví dụ: 2 tháng" />
+                </label>
+              </div>
+            </div>
             <label class="wish-note">Ghi chú thêm
               <textarea name="note" rows="2" placeholder="Mong muốn cụ thể về hợp đồng, ngành nghề, mức lương…"></textarea>
             </label>
@@ -436,7 +453,8 @@ function bindWishForm(form) {
   const programSel = $('[data-wish-program]', form);
   const careerField = $('[data-wish-career-field]', form);
   const careerSel = $('[data-wish-career]', form);
-  const syncCareer = () => {
+  const block18 = $('[data-wish-18]', form);
+  const syncFields = () => {
     const list = GERMANY_CAREERS[programSel.value];
     if (list && list.length) {
       careerSel.innerHTML = '<option value="">— Chọn ngành nghề —</option>' + list.map((c) => `<option>${c}</option>`).join('');
@@ -445,9 +463,10 @@ function bindWishForm(form) {
       careerSel.innerHTML = '<option value="">— Chọn ngành nghề —</option>';
       careerField.hidden = true;
     }
+    if (block18) block18.hidden = programSel.value !== 'Chuyển đổi văn bằng 18B/18A';
   };
-  programSel.addEventListener('change', syncCareer);
-  syncCareer();
+  programSel.addEventListener('change', syncFields);
+  syncFields();
   form.addEventListener('submit', submitWish);
 }
 
@@ -469,6 +488,8 @@ async function submitWish(event) {
     form.reset();
     const careerField = $('[data-wish-career-field]', form);
     if (careerField) careerField.hidden = true;
+    const block18 = $('[data-wish-18]', form);
+    if (block18) block18.hidden = true;
     setMsg(`Cảm ơn anh/chị! DCC đã nhận nguyện vọng và sẽ liên hệ tư vấn sớm. Mã tra cứu của bạn: ${payload.lookup_code}`, 'success');
   } catch (error) {
     console.error(error);
