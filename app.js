@@ -200,7 +200,7 @@ function renderHome() {
       <div class="container hero-grid">
         <div class="hero-content">
           <p class="eyebrow">Cầu nối Việt Nam – Đức</p>
-          <h1>Hành trình sang Đức <em>rõ ràng</em>, hồ sơ minh bạch, tương lai vững vàng.</h1>
+          <h1>Hành trình sang Đức <em>rõ ràng</em>, hồ sơ <em>minh bạch</em>, tương lai <em>vững vàng</em>.</h1>
           <p class="hero-text">Deutsch Connect Center đồng hành cùng bạn trọn hành trình: học tiếng Đức, du học nghề, chuyển đổi văn bằng 18B/18A, Au-pair, thời vụ, hồ sơ visa và kết nối việc làm tại Đức.</p>
           <div class="hero-actions">
             <a class="btn primary" href="#/dang-ky">Đăng ký tư vấn ngay</a>
@@ -211,16 +211,16 @@ function renderHome() {
             <span>Du học nghề</span><span>18B/18A</span><span>Au-pair</span><span>Thời vụ 8 tháng</span><span>A1-B2</span>
           </div>
         </div>
-        <div class="hero-visual" aria-label="Minh họa hệ thống hồ sơ DCC">
-          <div class="visual-card main-card">
-            <span class="status-dot"></span>
-            <p>Hồ sơ học viên</p>
-            <strong>Đang xử lý visa</strong>
-            <small>3 giấy tờ cần theo dõi trong tuần này</small>
-          </div>
+        <div class="hero-visual" aria-label="Hình ảnh nước Đức và tiến độ hồ sơ">
           <div class="visual-photo"></div>
-          <div class="stats-card"><strong>05</strong><span>nhóm chương trình: Du học nghề, 18B/18A, Au-pair, 8 tháng, học tiếng</span></div>
-          <div class="stats-card light"><strong>Online</strong><span>theo dõi checklist, deadline, ghi chú được phép hiển thị</span></div>
+          <div class="visual-card main-card">
+            <div class="mc-head"><span class="status-dot"></span> Hồ sơ của bạn</div>
+            <strong>Đang xử lý visa</strong>
+            <div class="mc-progress"><span></span></div>
+            <small>3 giấy tờ cần bổ sung trong tuần</small>
+          </div>
+          <div class="stats-card"><strong>5</strong><span>chương trình: du học nghề, 18B/18A, Au-pair, thời vụ, học tiếng</span></div>
+          <div class="live-pill"><span class="live-dot"></span> Theo dõi tiến độ online</div>
         </div>
       </div>
     </section>
