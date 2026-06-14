@@ -51,3 +51,30 @@ ghi thẳng vào database Notion. Token KHÔNG nằm trong code chạy ở máy 
 ## Tự động hoá sau này (gợi ý)
 Khi đã có lead trong Notion, anh có thể bật **Notion Automations** hoặc nối **Make/Zapier/n8n**:
 mỗi khi có dòng mới → gửi Zalo/email cho tư vấn viên, hoặc tạo nhắc việc gọi lại trong 24h.
+
+---
+
+# Đăng ký TÀI KHOẢN (học viên & đối tác) — 2 database mới
+
+Trang **Đăng ký** giờ cho học viên/đối tác tự tạo tài khoản + đặt mật khẩu, lần sau đăng nhập bằng
+**email hoặc số điện thoại + mật khẩu**. Mật khẩu được **băm (scrypt)** trước khi lưu — Notion KHÔNG thấy mật khẩu thật.
+
+- Hàm xử lý: `api/account.js` (đăng ký `action:"register"` + đăng nhập `action:"login"`, `role:"member"|"partner"`).
+- 2 database đã tạo sẵn:
+  - **DCC – Thành viên đã đăng ký** — ID `0057067441c7480999b74cce9a00ea38`
+    https://app.notion.com/p/0057067441c7480999b74cce9a00ea38
+  - **DCC – Đối tác đã đăng ký** — ID `e8c2c2c5e83e4d1fa2fb63f9be9e1df0`
+    https://app.notion.com/p/e8c2c2c5e83e4d1fa2fb63f9be9e1df0
+  - 2 ID này đã **hardcode mặc định** trong `api/account.js`, nên KHÔNG bắt buộc thêm biến môi trường.
+    (Tùy chọn: đặt `NOTION_MEMBERS_DB_ID` / `NOTION_PARTNERS_DB_ID` trên Vercel nếu sau này đổi DB.)
+
+## Việc anh cần làm 1 lần (bắt buộc) — cấp quyền cho integration
+Giống Bước 2 ở trên, nhưng làm cho **cả 2 database mới**:
+1. Mở **DCC – Thành viên đã đăng ký** → góc trên phải **•••** → **Connections** (Kết nối) → **Add connections** → chọn đúng integration đang dùng cho Lead (vd `DCC Website`).
+2. Làm y hệt với **DCC – Đối tác đã đăng ký**.
+- Chưa làm bước này thì web báo *"Chưa tạo được tài khoản"* (lỗi 502) khi bấm đăng ký.
+
+## Kiểm tra
+- `GET /api/account` → trả **405** = hàm đã live.
+- Vào web → **Đăng ký** → tạo thử 1 tài khoản học viên → thấy dòng mới trong DB "Thành viên đã đăng ký",
+  cột **"Mật khẩu (đã mã hoá)"** ở dạng `salt:hash`. Sau đó vào **Đăng nhập** thử email/SĐT + mật khẩu vừa đặt.
