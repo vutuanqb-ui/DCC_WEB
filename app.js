@@ -3,7 +3,7 @@ const PROGRAMS = [
     slug: 'du-hoc-nghe-duc',
     icon: '🎓',
     title: 'Du học nghề Đức',
-    summary: 'Dành cho học sinh/sinh viên muốn học nghề, làm việc và xây dựng tương lai dài hạn tại Đức.',
+    summary: 'Đào tạo nghề kép (Ausbildung): vừa học tại trường nghề vừa thực hành có lương tại doanh nghiệp Đức. Miễn học phí trường công, mở đường làm việc và định cư lâu dài.',
     tags: ['Nhà hàng khách sạn', 'Điều dưỡng', 'Bếp', 'Bán hàng', 'Logistics', 'Kỹ thuật', 'Bánh', 'Thịt'],
     cta: 'Xem đơn du học nghề'
   },
@@ -11,7 +11,7 @@ const PROGRAMS = [
     slug: '18b-18a',
     icon: '📘',
     title: 'Chuyển đổi văn bằng 18B / 18A',
-    summary: 'Dành cho người đã có bằng trung cấp/cao đẳng/đại học cần kiểm tra điều kiện công nhận, chuyển đổi hoặc làm việc tại Đức.',
+    summary: 'Diện lao động tay nghề theo Luật Nhập cư Đức: §18a cho người có bằng nghề, §18b cho người có bằng đại học. DCC kiểm tra điều kiện công nhận văn bằng và hỗ trợ tìm hợp đồng việc làm.',
     tags: ['Công nhận văn bằng', 'Hồ sơ nghề', 'Hợp đồng lao động', 'Visa việc làm'],
     cta: 'Kiểm tra điều kiện 18B/18A'
   },
@@ -19,7 +19,7 @@ const PROGRAMS = [
     slug: 'au-pair-duc',
     icon: '🏡',
     title: 'Au-pair Đức',
-    summary: 'Dành cho người muốn trải nghiệm văn hóa Đức, học tiếng và sống cùng gia đình bản xứ theo lộ trình phù hợp.',
+    summary: 'Sống cùng một gia đình Đức tới 12 tháng, phụ giúp chăm sóc trẻ và nhận tiền tiêu vặt hằng tháng. Cách nhẹ nhàng để học tiếng và trải nghiệm đời sống Đức trước khi đi xa hơn.',
     tags: ['A1/A2', 'Gia đình bản xứ', 'Thư động lực', 'Lộ trình sau Au-pair'],
     cta: 'Đăng ký tư vấn Au-pair'
   },
@@ -27,7 +27,7 @@ const PROGRAMS = [
     slug: 'thoi-vu-8-thang',
     icon: '🧭',
     title: 'Chương trình thời vụ 8 tháng',
-    summary: 'Dành cho người muốn đi Đức làm việc ngắn hạn theo mùa vụ, cần hiểu rõ điều kiện, thời gian và rủi ro.',
+    summary: 'Hợp đồng lao động thời vụ theo mùa tại Đức (nông nghiệp, dịch vụ…). Thời gian ngắn, thu nhập rõ ràng — phù hợp người muốn đi nhanh và cần chuẩn bị đúng kế hoạch tài chính.',
     tags: ['8 tháng', 'Lao động mùa vụ', 'Lịch nhập cảnh', 'Hồ sơ rõ ràng'],
     cta: 'Xem chương trình 8 tháng'
   },
@@ -35,7 +35,7 @@ const PROGRAMS = [
     slug: 'hoc-tieng-duc',
     icon: '🇩🇪',
     title: 'Đăng ký học tiếng Đức',
-    summary: 'Các lớp A1, A2, B1, B2 có kiểm tra đầu vào, lộ trình học và theo dõi tiến độ rõ ràng.',
+    summary: 'Lớp A1–B2 theo khung tham chiếu châu Âu (CEFR): kiểm tra đầu vào, lộ trình cá nhân hóa và theo sát tiến độ đến ngày thi chứng chỉ.',
     tags: ['A1', 'A2', 'B1', 'B2', 'Kiểm tra đầu vào'],
     cta: 'Đăng ký học tiếng'
   }
@@ -113,12 +113,12 @@ const ORDERS = [
 ];
 
 const PROCESS_STEPS = [
-  ['01', 'Đăng ký thông tin', 'Ghi nhận nhu cầu, nguồn khách và chương trình quan tâm.'],
-  ['02', 'Tư vấn và kiểm tra điều kiện', 'Đánh giá tiếng Đức, bằng cấp, tài chính, thời gian và mức phù hợp.'],
-  ['03', 'Học tiếng Đức / hoàn thiện hồ sơ', 'Theo dõi trình độ, checklist giấy tờ, deadline và file cần bổ sung.'],
-  ['04', 'Phỏng vấn đối tác / nhận hợp đồng', 'Chuẩn bị phỏng vấn, cập nhật kết quả và hợp đồng nếu đạt.'],
-  ['05', 'Xin visa / theo dõi tiến độ', 'Quản lý lịch hẹn, bổ sung giấy tờ, trạng thái visa và ghi chú xử lý.'],
-  ['06', 'Bay Đức / hỗ trợ sau bay', 'Tiếp tục đồng hành sau nhập cảnh, ổn định ban đầu và kết nối cần thiết.']
+  ['01', 'Đăng ký thông tin', 'Bạn để lại thông tin và chương trình đang quan tâm.'],
+  ['02', 'Tư vấn & kiểm tra điều kiện', 'Đánh giá tiếng Đức, bằng cấp, tài chính và thời gian để chọn đúng diện.'],
+  ['03', 'Học tiếng & hoàn thiện hồ sơ', 'Học theo lộ trình, chuẩn bị giấy tờ theo checklist rõ ràng.'],
+  ['04', 'Phỏng vấn & nhận hợp đồng', 'Chuẩn bị phỏng vấn với đối tác và ký hợp đồng khi đạt.'],
+  ['05', 'Xin visa & theo dõi tiến độ', 'Hoàn thiện hồ sơ visa, theo dõi lịch hẹn và trạng thái xử lý.'],
+  ['06', 'Sang Đức & hỗ trợ sau bay', 'Đồng hành sau khi nhập cảnh, ổn định những ngày đầu tại Đức.']
 ];
 
 const RISKS = [
@@ -199,9 +199,9 @@ function renderHome() {
     <section class="hero">
       <div class="container hero-grid">
         <div class="hero-content">
-          <p class="eyebrow">Cầu nối Việt Nam - Đức có hệ thống</p>
-          <h1>Lộ trình sang Đức rõ ràng hơn, hồ sơ minh bạch hơn, tương lai được chuẩn bị bài bản hơn.</h1>
-          <p class="hero-text">Deutsch Connect Center hỗ trợ học tiếng Đức, tuyển sinh du học nghề Đức, chuyển đổi văn bằng 18B/18A, Au-pair, thời vụ 8 tháng, hồ sơ visa và kết nối đối tác tại Đức.</p>
+          <p class="eyebrow">Cầu nối Việt Nam – Đức</p>
+          <h1>Hành trình sang Đức <em>rõ ràng</em>, hồ sơ minh bạch, tương lai vững vàng.</h1>
+          <p class="hero-text">Deutsch Connect Center đồng hành cùng bạn trọn hành trình: học tiếng Đức, du học nghề, chuyển đổi văn bằng 18B/18A, Au-pair, thời vụ, hồ sơ visa và kết nối việc làm tại Đức.</p>
           <div class="hero-actions">
             <a class="btn primary" href="#/dang-ky">Đăng ký tư vấn ngay</a>
             <a class="btn secondary" href="#/don-hang">Xem đơn hàng đang tuyển</a>
@@ -238,7 +238,7 @@ function renderProgramsSection() {
   return `
     <section class="section" id="programs">
       <div class="container">
-        ${sectionHeader('Chọn lộ trình phù hợp với bạn', 'DCC tư vấn theo điều kiện thực tế, không ép chọn sai diện.', 'Mỗi card tập trung vào đối tượng, điều kiện và bước tiếp theo để học viên/phụ huynh hiểu nhanh trong 5 giây.')}
+        ${sectionHeader('Chương trình', 'Chọn đúng lộ trình sang Đức cho riêng bạn', 'Mỗi diện có điều kiện và đối tượng khác nhau. DCC tư vấn theo đúng năng lực thực tế của bạn — không khuyên chọn sai diện.')}
         <div class="program-grid">${PROGRAMS.map(renderProgramCard).join('')}</div>
       </div>
     </section>`;
@@ -258,7 +258,7 @@ function renderOrdersSection() {
   return `
     <section class="section orders-section" id="orders">
       <div class="container">
-        ${sectionHeader('Đơn hàng đang tuyển', 'Cơ hội được trình bày rõ điều kiện, trạng thái và rủi ro.', 'Bộ lọc giúp học viên nhanh chóng chọn đúng chương trình, ngành nghề, bang/thành phố, yêu cầu tiếng Đức và thời gian dự kiến.')}
+        ${sectionHeader('Đơn hàng', 'Cơ hội đang tuyển tại Đức', 'Mỗi đơn ghi rõ điều kiện, mức hỗ trợ, yêu cầu tiếng và thời gian dự kiến. Lọc theo nhu cầu để tìm đúng cơ hội của bạn.')}
         ${renderFilters()}
         <div id="ordersList" class="orders-list"></div>
       </div>
@@ -295,14 +295,14 @@ function renderOrderCards(list = ORDERS) {
 }
 
 function renderProcessSection() {
-  return `<section class="section process-section" id="process"><div class="container">${sectionHeader('Quy trình 6 bước', 'Từ đăng ký đến visa và hỗ trợ sau bay.', 'Timeline giúp học viên, phụ huynh, đối tác và nhân viên nhìn cùng một tiến độ, giảm nhầm lẫn trong xử lý hồ sơ.')}
+  return `<section class="section process-section" id="process"><div class="container">${sectionHeader('Quy trình', 'Sáu bước, từ đăng ký đến khi ổn định tại Đức', 'Một lộ trình thống nhất để bạn luôn biết hồ sơ đang ở đâu và bước tiếp theo cần làm gì.')}
     <div class="timeline">${PROCESS_STEPS.map(([no, title, text]) => `<article><span>${no}</span><h3>${title}</h3><p>${text}</p></article>`).join('')}</div>
   </div></section>`;
 }
 
 function renderRisksSection(short = false) {
   const list = short ? RISKS.slice(0, 4) : RISKS;
-  return `<section class="section risks-section" id="risks"><div class="container">${sectionHeader('Rủi ro cần biết trước khi tham gia', 'Minh bạch rủi ro để chuẩn bị tốt hơn, không làm khách sợ.', 'DCC không hứa hẹn quá đà. Trung tâm giảm rủi ro bằng kiểm tra hồ sơ từ đầu, checklist, nhắc deadline, ghi chú chăm sóc và phân quyền xử lý nội bộ.')}
+  return `<section class="section risks-section" id="risks"><div class="container">${sectionHeader('Minh bạch', 'Những rủi ro nên biết trước khi bắt đầu', 'Chúng tôi nói thẳng về rủi ro để bạn chuẩn bị chủ động — và cho biết DCC giúp bạn giảm thiểu từng điều ra sao.')}
     <div class="risk-list">${list.map(([risk, support]) => `<details class="risk-item"><summary>${risk}</summary><div><h4>DCC hỗ trợ giảm rủi ro bằng cách nào?</h4><p>${support}</p></div></details>`).join('')}</div>
     ${short ? '<a class="btn secondary center-btn" href="#/rui-ro-can-biet">Xem đầy đủ các rủi ro</a>' : ''}
   </div></section>`;
@@ -320,7 +320,7 @@ const GALLERY = [
 ];
 
 function renderGallerySection() {
-  return `<section class="section gallery-section"><div class="container">${sectionHeader('Hình ảnh trung tâm', 'Không gian học tập, tư vấn và kết nối Đức - Việt.', 'Những khoảnh khắc học tập, tư vấn và hành trình sang Đức cùng Deutsch Connect Center.')}
+  return `<section class="section gallery-section"><div class="container">${sectionHeader('Hình ảnh', 'Không gian học tập và hành trình sang Đức', 'Những khoảnh khắc học tiếng, tư vấn và kết nối Đức – Việt tại Deutsch Connect Center.')}
     <div class="gallery-grid">${GALLERY.map((item, index) => `<figure class="gallery-item tone-${index + 1}"${item.img ? ` style="background-image:url('${item.img}');background-size:cover;background-position:center;"` : ''}><span>${item.label}</span></figure>`).join('')}</div>
   </div></section>`;
 }
@@ -337,13 +337,13 @@ function renderWhySection() {
     ['Cảnh báo rủi ro từ đầu', 'DCC nói rõ rủi ro và chi phí ngay từ đầu để bạn chuẩn bị đúng, không vỡ kế hoạch.'],
     ['Kết nối đối tác Đức', 'DCC làm việc trực tiếp với đối tác tại Đức để cập nhật đơn hàng và cơ hội thực tế.']
   ];
-  return `<section class="section why-section"><div class="container">${sectionHeader('Vì sao chọn Deutsch Connect Center?', 'Uy tín đến từ hệ thống, quy trình và cách nói thật với học viên.', 'DCC tập trung vào dữ liệu rõ ràng, phân công trách nhiệm và tiến độ hồ sơ có thể theo dõi.')}
+  return `<section class="section why-section"><div class="container">${sectionHeader('Vì sao chọn DCC', 'Uy tín đến từ hệ thống và sự minh bạch', 'Không lời hứa hão — chỉ có quy trình rõ ràng, trách nhiệm cụ thể và tiến độ bạn theo dõi được mọi lúc.')}
     <div class="why-grid">${reasons.map(([title, text]) => `<article><span>✓</span><h3>${title}</h3><p>${text}</p></article>`).join('')}</div>
   </div></section>`;
 }
 
 function renderRegisterSection() {
-  return `<section class="section register-section" id="register"><div class="container register-grid"><div><p class="eyebrow">Đăng ký tư vấn</p><h2>Điền từng bước, không quá dài trên một màn hình.</h2><p class="muted">Form chia thành các bước ngắn, dễ điền ngay trên điện thoại. Sau khi nhận thông tin, DCC sẽ liên hệ lại để tư vấn miễn phí và đúng diện cho bạn.</p><div class="secure-note">🔒 Thông tin của bạn được bảo mật và chỉ dùng để tư vấn lộ trình phù hợp.</div></div>${renderLeadForm()}</div></section>`;
+  return `<section class="section register-section" id="register"><div class="container register-grid"><div><p class="eyebrow">Đăng ký tư vấn</p><h2>Để lại thông tin, DCC gọi lại cho bạn.</h2><p class="muted">Chỉ vài thông tin cơ bản, điền gọn ngay trên điện thoại. DCC sẽ liên hệ tư vấn miễn phí và đúng diện cho bạn.</p><div class="secure-note">🔒 Thông tin của bạn được bảo mật, chỉ dùng để tư vấn lộ trình phù hợp.</div></div>${renderLeadForm()}</div></section>`;
 }
 
 function renderLeadForm() {
@@ -357,11 +357,11 @@ function renderLeadForm() {
   </form>`;
 }
 
-function renderOrdersPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Đơn hàng</p><h1>Đơn hàng đang tuyển</h1><p>Các chương trình được trình bày bằng card rõ ràng, tối ưu cho điện thoại và có bộ lọc theo nhu cầu.</p></div></section>${renderOrdersSection()}`; }
-function renderProgramsPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Chương trình</p><h1>Chọn đúng diện trước khi chuẩn bị hồ sơ</h1><p>DCC ưu tiên đánh giá điều kiện thực tế, tránh hứa hẹn quá đà và giúp học viên hiểu rõ việc cần làm.</p></div></section>${renderProgramsSection()}`; }
-function renderRegisterPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Đăng ký</p><h1>Cổng đăng ký khách hàng mới</h1><p>Sau khi gửi form, bạn nhận mã tra cứu tạm thời để trao đổi với DCC và có thể được tạo tài khoản học viên trong giai đoạn xử lý hồ sơ.</p></div></section>${renderRegisterSection()}`; }
-function renderRisksPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Minh bạch</p><h1>Rủi ro cần biết trước khi tham gia</h1><p>DCC trình bày rủi ro một cách nghiêm túc để học viên chuẩn bị đúng, không tạo kỳ vọng sai.</p></div></section>${renderRisksSection(false)}`; }
-function renderProcessPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Quy trình hồ sơ</p><h1>6 bước theo dõi từ đăng ký đến sau bay</h1><p>Quy trình dùng chung cho tư vấn, đối tác, học viên và nhân viên nội bộ.</p></div></section>${renderProcessSection()}`; }
+function renderOrdersPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Đơn hàng</p><h1>Cơ hội đang tuyển tại Đức</h1><p>Cơ hội học nghề, làm việc và trải nghiệm tại Đức — kèm bộ lọc theo đúng nhu cầu của bạn.</p></div></section>${renderOrdersSection()}`; }
+function renderProgramsPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Chương trình</p><h1>Chọn đúng diện trước khi chuẩn bị hồ sơ</h1><p>DCC đánh giá điều kiện thực tế của bạn để tư vấn đúng diện — không hứa hẹn quá đà, không vẽ kỳ vọng sai.</p></div></section>${renderProgramsSection()}`; }
+function renderRegisterPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Đăng ký</p><h1>Đăng ký tư vấn miễn phí</h1><p>Gửi thông tin xong, bạn nhận ngay một mã tra cứu để theo dõi và trao đổi với DCC trong suốt quá trình xử lý hồ sơ.</p></div></section>${renderRegisterSection()}`; }
+function renderRisksPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Minh bạch</p><h1>Những rủi ro nên biết trước khi bắt đầu</h1><p>Chúng tôi trình bày rủi ro một cách nghiêm túc để bạn chuẩn bị đúng, thay vì tạo kỳ vọng sai.</p></div></section>${renderRisksSection(false)}`; }
+function renderProcessPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Quy trình hồ sơ</p><h1>Sáu bước, từ đăng ký đến khi ổn định tại Đức</h1><p>Một quy trình thống nhất cho cả học viên, đối tác và đội ngũ DCC cùng theo dõi.</p></div></section>${renderProcessSection()}`; }
 
 function renderProgramDetail(program) {
   return `<section class="page-hero"><div class="container"><p class="eyebrow">${program.title}</p><h1>${program.summary}</h1><p>${program.tags.join(' • ')}</p><div class="hero-actions"><a class="btn primary" href="#/dang-ky">${program.cta}</a><a class="btn secondary" href="#/don-hang">Xem đơn hàng phù hợp</a></div></div></section>${renderProcessSection()}${renderRegisterSection()}`;
@@ -374,11 +374,11 @@ function renderOrderDetail(id) {
 }
 
 function renderStudentPortal() {
-  return `<section class="page-hero"><div class="container"><p class="eyebrow">Cổng học viên</p><h1>Dashboard cá nhân — chỉ bạn xem được hồ sơ của mình</h1><p>Đăng nhập bằng email hoặc số điện thoại đã đăng ký để xem hồ sơ, tiến độ học tiếng và lịch hẹn của riêng bạn.</p></div></section><section class="section"><div class="container portal-layout"><aside class="portal-card"><h2>Thông tin cá nhân</h2><p><b>Chương trình:</b> Du học nghề Đức</p><p><b>Trạng thái hiện tại:</b> Đang hoàn thiện hồ sơ</p><p><b>Deadline gần nhất:</b> Bổ sung hộ chiếu</p></aside><div><div class="stage-timeline">${PORTAL_STAGES.map((stage, idx) => `<span class="${idx <= 3 ? 'done' : ''}">${stage}</span>`).join('')}</div><div class="portal-grid">${['Checklist giấy tờ', 'Trạng thái học tiếng', 'Phỏng vấn', 'Hợp đồng', 'Visa', 'Lịch hẹn', 'Ghi chú được phép hiển thị', 'File cần bổ sung'].map((item) => `<article><h3>${item}</h3><p>Thông tin chi tiết sẽ hiển thị khi bạn đăng nhập tài khoản học viên.</p></article>`).join('')}</div></div></div></section>`;
+  return `<section class="page-hero"><div class="container"><p class="eyebrow">Cổng học viên</p><h1>Hồ sơ cá nhân — chỉ riêng bạn xem được</h1><p>Đăng nhập bằng email hoặc số điện thoại đã đăng ký để xem hồ sơ, tiến độ học tiếng và lịch hẹn của riêng bạn.</p></div></section><section class="section"><div class="container portal-layout"><aside class="portal-card"><h2>Thông tin cá nhân</h2><p><b>Chương trình:</b> Du học nghề Đức</p><p><b>Trạng thái hiện tại:</b> Đang hoàn thiện hồ sơ</p><p><b>Deadline gần nhất:</b> Bổ sung hộ chiếu</p></aside><div><div class="stage-timeline">${PORTAL_STAGES.map((stage, idx) => `<span class="${idx <= 3 ? 'done' : ''}">${stage}</span>`).join('')}</div><div class="portal-grid">${['Checklist giấy tờ', 'Trạng thái học tiếng', 'Phỏng vấn', 'Hợp đồng', 'Visa', 'Lịch hẹn', 'Ghi chú được phép hiển thị', 'File cần bổ sung'].map((item) => `<article><h3>${item}</h3><p>Thông tin chi tiết sẽ hiển thị khi bạn đăng nhập tài khoản học viên.</p></article>`).join('')}</div></div></div></section>`;
 }
 
 function renderPartnerPortal() {
-  return `<section class="page-hero"><div class="container"><p class="eyebrow">Cổng đối tác</p><h1>Đối tác gửi học viên và theo dõi học viên của mình</h1><p>Mỗi đối tác chỉ xem được các học viên do chính mình giới thiệu, không xem được dữ liệu của đối tác khác.</p></div></section><section class="section"><div class="container portal-layout"><aside class="portal-card"><h2>Thống kê đối tác</h2>${['Tổng học viên đã gửi: 24', 'Đang tư vấn: 7', 'Đang học tiếng: 8', 'Đã có hợp đồng: 3', 'Đang visa: 4', 'Đã bay: 2'].map((item) => `<p>${item}</p>`).join('')}</aside><div>${renderPartnerForm()}<div class="table-card"><h2>Danh sách học viên mẫu</h2><table><thead><tr><th>Học viên</th><th>Chương trình</th><th>Trạng thái</th><th>Thiếu hồ sơ</th></tr></thead><tbody><tr><td>Nguyễn Văn A</td><td>Du học nghề</td><td>Đang học tiếng</td><td>Hộ chiếu</td></tr><tr><td>Trần Thị B</td><td>Au-pair</td><td>Chờ phỏng vấn</td><td>Không</td></tr></tbody></table></div></div></div></section>`;
+  return `<section class="page-hero"><div class="container"><p class="eyebrow">Cổng đối tác</p><h1>Gửi học viên và theo dõi hồ sơ của bạn</h1><p>Mỗi đối tác chỉ xem được học viên do chính mình giới thiệu — dữ liệu của các đối tác khác được tách riêng tuyệt đối.</p></div></section><section class="section"><div class="container portal-layout"><aside class="portal-card"><h2>Thống kê đối tác</h2>${['Tổng học viên đã gửi: 24', 'Đang tư vấn: 7', 'Đang học tiếng: 8', 'Đã có hợp đồng: 3', 'Đang visa: 4', 'Đã bay: 2'].map((item) => `<p>${item}</p>`).join('')}</aside><div>${renderPartnerForm()}<div class="table-card"><h2>Danh sách học viên mẫu</h2><table><thead><tr><th>Học viên</th><th>Chương trình</th><th>Trạng thái</th><th>Thiếu hồ sơ</th></tr></thead><tbody><tr><td>Nguyễn Văn A</td><td>Du học nghề</td><td>Đang học tiếng</td><td>Hộ chiếu</td></tr><tr><td>Trần Thị B</td><td>Au-pair</td><td>Chờ phỏng vấn</td><td>Không</td></tr></tbody></table></div></div></div></section>`;
 }
 
 function renderPartnerForm() {
@@ -386,10 +386,10 @@ function renderPartnerForm() {
 }
 
 function renderInternalApp() {
-  return `<section class="page-hero"><div class="container"><p class="eyebrow">App nội bộ</p><h1>Operating Center cho nhân viên DCC</h1><p>Phân quyền theo vai trò: admin, quản lý, nhân viên, giáo viên, đối tác và học viên — mỗi người chỉ thấy phần dữ liệu thuộc trách nhiệm của mình.</p><div class="hero-actions"><a class="btn primary" href="${(window.DCC_PUBLIC_CONFIG || {}).STAFF_APP_URL || 'https://app.deutschconnectcenter.com'}">Mở subdomain app</a></div></div></section><section class="section"><div class="container"><div class="role-grid">${['admin: xem và quản lý tất cả', 'manager: xem phần được giao', 'staff: xem khách/hồ sơ assign_to', 'teacher: lớp/học viên được phân công', 'partner: học viên do mình gửi', 'student/customer: hồ sơ của chính mình'].map((role) => `<span>${role}</span>`).join('')}</div><div class="module-grid">${MODULES.map(([title, text]) => `<article><h3>${title}</h3><p>${text}</p></article>`).join('')}</div></div></section>`;
+  return `<section class="page-hero"><div class="container"><p class="eyebrow">App nội bộ</p><h1>Trung tâm điều hành nội bộ DCC</h1><p>Phân quyền theo vai trò: admin, quản lý, nhân viên, giáo viên, đối tác và học viên — mỗi người chỉ thấy phần dữ liệu thuộc trách nhiệm của mình.</p><div class="hero-actions"><a class="btn primary" href="${(window.DCC_PUBLIC_CONFIG || {}).STAFF_APP_URL || 'https://app.deutschconnectcenter.com'}">Mở ứng dụng nội bộ</a></div></div></section><section class="section"><div class="container"><div class="role-grid">${['admin: xem và quản lý tất cả', 'manager: xem phần được giao', 'staff: xem khách/hồ sơ assign_to', 'teacher: lớp/học viên được phân công', 'partner: học viên do mình gửi', 'student/customer: hồ sơ của chính mình'].map((role) => `<span>${role}</span>`).join('')}</div><div class="module-grid">${MODULES.map(([title, text]) => `<article><h3>${title}</h3><p>${text}</p></article>`).join('')}</div></div></section>`;
 }
 
-function renderLookupPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Tra cứu hồ sơ</p><h1>Tra cứu nhanh trạng thái hồ sơ bằng mã hoặc thông tin đã đăng ký</h1><p>Nhập mã tra cứu DCC đã cấp, hoặc email/số điện thoại bạn dùng khi đăng ký để xem nhanh tình trạng hồ sơ.</p></div></section><section class="section"><div class="container narrow"><form class="lead-form"><label>Mã tra cứu / email / số điện thoại<input placeholder="DCC-2026-xxxxx"></label><button class="btn primary" type="button">Tra cứu</button><p class="muted">Để bảo mật, một số thông tin chi tiết chỉ hiển thị sau khi bạn đăng nhập tài khoản học viên.</p></form></div></section>`; }
+function renderLookupPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Tra cứu hồ sơ</p><h1>Tra cứu tiến độ hồ sơ</h1><p>Nhập mã tra cứu DCC đã cấp, hoặc email / số điện thoại bạn dùng khi đăng ký để xem nhanh tình trạng hồ sơ.</p></div></section><section class="section"><div class="container narrow"><form class="lead-form"><label>Mã tra cứu / email / số điện thoại<input placeholder="DCC-2026-xxxxx"></label><button class="btn primary" type="button">Tra cứu</button><p class="muted">Để bảo mật, một số thông tin chi tiết chỉ hiển thị sau khi bạn đăng nhập tài khoản học viên.</p></form></div></section>`; }
 function renderAboutContact(path) { return `<section class="page-hero"><div class="container"><p class="eyebrow">${path === '/gioi-thieu' ? 'Giới thiệu' : 'Liên hệ'}</p><h1>Deutsch Connect Center</h1><p>Trung tâm hỗ trợ học tiếng Đức, tuyển sinh du học nghề, chuyển đổi văn bằng 18B/18A, Au-pair, thời vụ 8 tháng, hồ sơ visa và kết nối đối tác tại Đức.</p></div></section>${renderWhySection()}${renderRegisterSection()}`; }
 
 function bindInteractions() {
