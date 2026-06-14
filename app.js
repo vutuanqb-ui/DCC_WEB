@@ -874,8 +874,9 @@ function bindHomeExperience() {
 function startGlobe(canvas, stage, reduce) {
   const ctx = canvas.getContext('2d');
   let W = 0, H = 0, cx = 0, cy = 0, R = 0, DPR = 1;
-  let raf = 0, tick = 0, rot = -1.1, mx = 0, my = 0, tmx = 0, tmy = 0, alive = true;
-  const TILT = -0.38;
+  let raf = 0, tick = 0, rot = -1.1, tilt = 0.32, alive = true;
+  let velRot = 0, velTilt = 0, dragging = false, lastX = 0, lastY = 0, dvx = 0, dvy = 0;
+  const AUTO = reduce ? 0 : 0.0016;
 
   const v = (lon, lat) => {
     const la = lat * Math.PI / 180, lo = lon * Math.PI / 180;
@@ -944,14 +945,19 @@ function startGlobe(canvas, stage, reduce) {
   function frame() {
     if (!alive) return;
     tick++;
-    if (!reduce) rot += 0.0017;
-    mx += (tmx - mx) * 0.06; my += (tmy - my) * 0.06;
-    const cyr = Math.cos(rot + mx), syr = Math.sin(rot + mx);
-    const cxr = Math.cos(TILT + my), sxr = Math.sin(TILT + my);
+    if (!dragging) {
+      velRot += (AUTO - velRot) * 0.03;   // êm dần về tốc độ tự xoay
+      velTilt *= 0.90;                     // quán tính nghiêng tắt dần
+      rot += velRot; tilt += velTilt;
+      if (tilt > 1.2) { tilt = 1.2; velTilt = 0; }
+      if (tilt < -1.2) { tilt = -1.2; velTilt = 0; }
+    }
+    const cyr = Math.cos(rot), syr = Math.sin(rot);
+    const cxr = Math.cos(tilt), sxr = Math.sin(tilt);
     const P = (p) => {
       let q = rotY(p, cyr, syr); q = rotX(q, cxr, sxr);
       const pe = 1 / (1 - q[2] * 0.28);
-      return { x: cx + q[0] * R * pe, y: cy + q[1] * R * pe, z: q[2], s: pe };
+      return { x: cx + q[0] * R * pe, y: cy - q[1] * R * pe, z: q[2], s: pe };
     };
     ctx.clearRect(0, 0, W, H);
     if (!W || !H) { raf = requestAnimationFrame(frame); return; }
@@ -1057,19 +1063,45 @@ function startGlobe(canvas, stage, reduce) {
     raf = requestAnimationFrame(frame);
   }
 
-  // Tương tác chuột: xoay nhẹ + dịch thẻ kính theo chiều sâu.
-  let onMove = null, onLeave = null;
+  // Kéo (chuột/cảm ứng) để tự xoay địa cầu theo tốc độ rê + quán tính khi thả.
   const hero = $('.bx-hero');
-  if (hero && !reduce && window.matchMedia('(pointer: fine)').matches) {
-    onMove = (e) => {
-      const r = hero.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width - 0.5;
-      const py = (e.clientY - r.top) / r.height - 0.5;
-      tmx = px * 0.6; tmy = py * 0.4;
-      if (stage) { stage.style.setProperty('--mx', `${(px * 24).toFixed(1)}px`); stage.style.setProperty('--my', `${(py * 24).toFixed(1)}px`); }
+  let onDown = null, onMove = null, onUp = null, onHero = null, onLeave = null;
+  if (canvas) {
+    canvas.style.cursor = 'grab'; canvas.style.touchAction = 'pan-y';
+    onDown = (e) => {
+      dragging = true; lastX = e.clientX; lastY = e.clientY; dvx = 0; dvy = 0;
+      velRot = 0; velTilt = 0; canvas.style.cursor = 'grabbing';
+      try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
     };
-    onLeave = () => { tmx = 0; tmy = 0; if (stage) { stage.style.setProperty('--mx', '0px'); stage.style.setProperty('--my', '0px'); } };
-    hero.addEventListener('pointermove', onMove);
+    onMove = (e) => {
+      if (!dragging) return;
+      e.preventDefault();
+      const k = 0.006;
+      dvx = (e.clientX - lastX) * k; dvy = (e.clientY - lastY) * k;
+      lastX = e.clientX; lastY = e.clientY;
+      rot += dvx; tilt += dvy;
+      if (tilt > 1.2) tilt = 1.2; if (tilt < -1.2) tilt = -1.2;
+    };
+    onUp = () => {
+      if (!dragging) return;
+      dragging = false; canvas.style.cursor = 'grab';
+      velRot = dvx || AUTO; velTilt = dvy;   // thả ra: bay tiếp theo tốc độ vừa rê
+    };
+    canvas.addEventListener('pointerdown', onDown);
+    canvas.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+    window.addEventListener('pointercancel', onUp);
+  }
+  // Thẻ kính dịch nhẹ theo con trỏ (chiều sâu) — không can thiệp xoay.
+  if (hero && stage && !reduce && window.matchMedia('(pointer: fine)').matches) {
+    onHero = (e) => {
+      const r = hero.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5, py = (e.clientY - r.top) / r.height - 0.5;
+      stage.style.setProperty('--mx', `${(px * 22).toFixed(1)}px`);
+      stage.style.setProperty('--my', `${(py * 22).toFixed(1)}px`);
+    };
+    onLeave = () => { stage.style.setProperty('--mx', '0px'); stage.style.setProperty('--my', '0px'); };
+    hero.addEventListener('pointermove', onHero);
     hero.addEventListener('pointerleave', onLeave);
   }
 
@@ -1083,7 +1115,10 @@ function startGlobe(canvas, stage, reduce) {
       alive = false;
       cancelAnimationFrame(raf);
       if (ro) ro.disconnect(); else window.removeEventListener('resize', resize);
-      if (hero && onMove) hero.removeEventListener('pointermove', onMove);
+      if (canvas && onDown) canvas.removeEventListener('pointerdown', onDown);
+      if (canvas && onMove) canvas.removeEventListener('pointermove', onMove);
+      if (onUp) { window.removeEventListener('pointerup', onUp); window.removeEventListener('pointercancel', onUp); }
+      if (hero && onHero) hero.removeEventListener('pointermove', onHero);
       if (hero && onLeave) hero.removeEventListener('pointerleave', onLeave);
     },
   };
