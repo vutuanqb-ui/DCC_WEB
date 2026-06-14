@@ -17,6 +17,52 @@
     [`Đăng nhập / Đăng ký`, `Log in / Sign up`, `Anmelden / Registrieren`],
     [`Đăng ký tư vấn miễn phí`, `Free consultation`, `Kostenlose Beratung`],
 
+    // ===== Trang chủ (bản nhận diện thương hiệu) =====
+    [`Deutsch Connect Center · Cầu nối Việt Nam – Đức`, `Deutsch Connect Center · Vietnam–Germany bridge`, `Deutsch Connect Center · Brücke Vietnam–Deutschland`],
+    [`Không lời hứa hão. Chỉ một lộ trình rõ ràng, một hồ sơ minh bạch và một đội ngũ đồng hành đến khi bạn thật sự vững vàng trên đất Đức.`,
+      `No empty promises. Just a clear roadmap, transparent paperwork and a team that stays with you until you truly stand firm in Germany.`,
+      `Keine leeren Versprechen. Nur ein klarer Fahrplan, transparente Unterlagen und ein Team, das Sie begleitet, bis Sie in Deutschland wirklich Fuß gefasst haben.`],
+    [`Bắt đầu hành trình`, `Start your journey`, `Reise beginnen`],
+    [`Khám phá chương trình`, `Explore programs`, `Programme entdecken`],
+    [`Du học nghề · 18B / 18A · Au-pair · Thời vụ 8 tháng · Học tiếng A1–B2`, `Vocational training · 18B / 18A · Au pair · 8-month seasonal · German A1–B2`, `Ausbildung · 18B / 18A · Au-pair · 8-Monate-Saison · Deutsch A1–B2`],
+    [`Minh bạch`, `Transparency`, `Transparenz`],
+    [`Đồng hành`, `By your side`, `An Ihrer Seite`],
+    [`Đúng diện`, `Right path`, `Richtiger Weg`],
+    [`Cuộn để khám phá`, `Scroll to explore`, `Zum Entdecken scrollen`],
+    [`Kim chỉ nam`, `Our compass`, `Unser Kompass`],
+    [`Tiêu chí hành động của DCC`, `DCC's guiding principles`, `DCCs Leitprinzipien`],
+    [`Bốn nguyên tắc làm nên một thương hiệu uy tín — được giữ trọn trong từng hồ sơ, từng cuộc gọi, từng người Việt mà DCC đồng hành.`,
+      `Four principles that build a trusted brand — upheld in every file, every call and every person DCC walks beside.`,
+      `Vier Prinzipien, die eine vertrauenswürdige Marke ausmachen — gewahrt in jeder Akte, jedem Anruf und bei jedem Menschen, den DCC begleitet.`],
+    [`Minh bạch tuyệt đối`, `Absolute transparency`, `Absolute Transparenz`],
+    [`Chi phí, rủi ro và tiến độ hồ sơ đều rõ ràng từ đầu. Bạn luôn biết mình đang ở đâu trên lộ trình.`,
+      `Costs, risks and application progress are clear from the start. You always know where you are on the journey.`,
+      `Kosten, Risiken und der Bearbeitungsstand sind von Anfang an klar. Sie wissen jederzeit, wo Sie auf dem Weg stehen.`],
+    [`Trách nhiệm đến cùng`, `Responsibility to the end`, `Verantwortung bis zum Schluss`],
+    [`Đồng hành từ buổi tư vấn đầu tiên cho tới khi bạn ổn định cuộc sống và công việc trên đất Đức.`,
+      `We stay with you from the first consultation until you have settled into life and work in Germany.`,
+      `Wir begleiten Sie vom ersten Beratungsgespräch, bis Sie Leben und Arbeit in Deutschland gefunden haben.`],
+    [`Đúng diện, đúng người`, `The right path for you`, `Der richtige Weg für Sie`],
+    [`Tư vấn theo đúng năng lực thật — không vẽ kỳ vọng sai, không ép chọn sai diện để chốt hồ sơ.`,
+      `Advice based on your real ability — no false hopes, no pushing you onto the wrong path just to close a case.`,
+      `Beratung auf Basis Ihrer echten Fähigkeiten — keine falschen Versprechen, kein Drängen auf den falschen Weg.`],
+    [`Tận tâm như người nhà`, `Caring like family`, `Fürsorge wie in der Familie`],
+    [`Mỗi học viên là một câu chuyện riêng. DCC lắng nghe và lo từng bước cùng bạn, không bỏ sót ai.`,
+      `Every student is a unique story. DCC listens and handles every step with you, leaving no one behind.`,
+      `Jeder Lernende ist eine eigene Geschichte. DCC hört zu und kümmert sich um jeden Schritt — niemand wird vergessen.`],
+    [`Cầu nối Việt Nam – Đức`, `Vietnam–Germany bridge`, `Brücke Vietnam–Deutschland`],
+    [`Việt Nam`, `Vietnam`, `Vietnam`],
+    [`Đức`, `Germany`, `Deutschland`],
+    [`chương trình sang Đức`, `programs to Germany`, `Programme nach Deutschland`],
+    [`lộ trình học tiếng`, `German learning path`, `Deutsch-Lernweg`],
+    [`hồ sơ minh bạch`, `transparent paperwork`, `transparente Unterlagen`],
+    [`tra cứu tiến độ mọi lúc`, `track progress anytime`, `Status jederzeit prüfen`],
+    [`Sẵn sàng?`, `Ready?`, `Bereit?`],
+    [`Để lại thông tin, DCC sẽ tư vấn miễn phí và đúng diện cho bạn — minh bạch ngay từ cuộc gọi đầu tiên.`,
+      `Leave your details and DCC will advise you for free and on the right path — transparent from the very first call.`,
+      `Hinterlassen Sie Ihre Daten — DCC berät Sie kostenlos und auf dem richtigen Weg, transparent ab dem ersten Anruf.`],
+    [`Tra cứu tiến độ hồ sơ`, `Track your application`, `Bewerbung verfolgen`],
+
     // ===== Footer =====
     [`Đồng hành cùng người Việt trên hành trình học tiếng, làm hồ sơ và xây dựng sự nghiệp tại Đức — minh bạch trong từng bước, trách nhiệm đến khi bạn ổn định.`,
       `Supporting Vietnamese people through learning German, preparing documents and building a career in Germany — transparent at every step, responsible until you settle in.`,
@@ -340,8 +386,18 @@
 
   // Tiêu đề hero có thẻ <em> → dịch nguyên cụm (giữ <em> để vẫn có nét vàng nghiêng).
   const HTML_I18N = {
-    en: { 'hero-main': `Your path to Germany — <em>clear</em>, <em>transparent</em> paperwork, a <em>solid</em> future.` },
-    de: { 'hero-main': `Dein Weg nach Deutschland — <em>klar</em>, <em>transparente</em> Unterlagen, eine <em>sichere</em> Zukunft.` },
+    en: {
+      'hero-main': `Your path to Germany — <em>clear</em>, <em>transparent</em> paperwork, a <em>solid</em> future.`,
+      'home-hero': `Bringing Vietnamese people to Germany — with <em>transparency</em> and <em>dedication</em>.`,
+      'home-bridge': `A solid bridge between two shores — where <em>dreams</em> meet <em>opportunity</em>.`,
+      'home-cta': `Your journey to Germany <em>begins today</em>.`,
+    },
+    de: {
+      'hero-main': `Dein Weg nach Deutschland — <em>klar</em>, <em>transparente</em> Unterlagen, eine <em>sichere</em> Zukunft.`,
+      'home-hero': `Wir bringen Vietnamesen nach Deutschland — mit <em>Transparenz</em> und <em>Hingabe</em>.`,
+      'home-bridge': `Eine feste Brücke zwischen zwei Ufern — wo <em>Träume</em> auf <em>Chancen</em> treffen.`,
+      'home-cta': `Ihre Reise nach Deutschland <em>beginnt heute</em>.`,
+    },
   };
 
   const LABELS = {

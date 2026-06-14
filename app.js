@@ -226,7 +226,7 @@ function renderHome() {
       <div class="container bx-hero-grid">
         <div class="bx-hero-copy">
           <p class="bx-eyebrow">Deutsch Connect Center · Cầu nối Việt Nam – Đức</p>
-          <h1 class="bx-title">Đưa người Việt đến nước Đức — bằng sự <em>minh bạch</em> và <em>tận tâm</em>.</h1>
+          <h1 class="bx-title" data-i18n-html="home-hero">Đưa người Việt đến nước Đức — bằng sự <em>minh bạch</em> và <em>tận tâm</em>.</h1>
           <p class="bx-lead">Không lời hứa hão. Chỉ một lộ trình rõ ràng, một hồ sơ minh bạch và một đội ngũ đồng hành đến khi bạn thật sự vững vàng trên đất Đức.</p>
           <div class="bx-actions">
             <a class="btn primary bx-btn-lg" href="#/don-hang">Bắt đầu hành trình</a>
@@ -236,17 +236,8 @@ function renderHome() {
         </div>
 
         <div class="bx-stage" aria-hidden="true">
-          <div class="bx-orbit bx-orbit-1"></div>
-          <div class="bx-orbit bx-orbit-2"></div>
-          <div class="bx-orbit bx-orbit-3"></div>
-          <div class="bx-medallion">
-            <div class="bx-medallion-face">
-              <span class="bx-mono">DCC</span>
-              <span class="bx-mono-sub">Deutsch Connect Center</span>
-              <span class="bx-mono-est">Est. Việt Nam</span>
-            </div>
-            <div class="bx-medallion-glare"></div>
-          </div>
+          <canvas class="bx-globe"></canvas>
+          <div class="bx-globe-badge"><span class="bx-globe-badge-mono">DCC</span></div>
           <div class="bx-chip bx-chip-1"><span class="bx-chip-dot"></span> Minh bạch</div>
           <div class="bx-chip bx-chip-2"><span class="bx-chip-dot"></span> Đồng hành</div>
           <div class="bx-chip bx-chip-3"><span class="bx-chip-dot"></span> Đúng diện</div>
@@ -280,12 +271,20 @@ function renderHome() {
       <div class="bx-aurora bx-aurora-soft" aria-hidden="true"></div>
       <div class="container bx-bridge-inner">
         <p class="bx-kicker bx-kicker-light">Cầu nối Việt Nam – Đức</p>
-        <h2 class="bx-bridge-title">Một cây cầu vững chãi giữa hai bờ — nơi <em>ước mơ</em> gặp <em>cơ hội</em>.</h2>
-        <div class="bx-bridge-arc" aria-hidden="true">
+        <h2 class="bx-bridge-title" data-i18n-html="home-bridge">Một cây cầu vững chãi giữa hai bờ — nơi <em>ước mơ</em> gặp <em>cơ hội</em>.</h2>
+        <div class="bx-bridge-arc">
+          <svg viewBox="0 0 600 140" role="img" aria-label="Cầu nối Việt Nam đến Đức">
+            <path id="bxArcPath" class="bx-arc-path" d="M30 120 Q300 -10 570 120"/>
+            <circle class="bx-arc-node" cx="30" cy="120" r="6"/>
+            <circle class="bx-arc-node" cx="570" cy="120" r="6"/>
+            <circle class="bx-arc-dot" r="5">
+              <animateMotion dur="3.6s" repeatCount="indefinite" rotate="auto" keyPoints="0;1" keyTimes="0;1" calcMode="linear">
+                <mpath href="#bxArcPath"></mpath>
+              </animateMotion>
+            </circle>
+          </svg>
           <span class="bx-bridge-end bx-bridge-vn">Việt Nam</span>
-          <svg viewBox="0 0 600 120" preserveAspectRatio="none"><path class="bx-arc-path" d="M40 100 Q300 -30 560 100"/></svg>
           <span class="bx-bridge-end bx-bridge-de">Đức</span>
-          <span class="bx-bridge-traveler"></span>
         </div>
         <div class="bx-bridge-stats">
           <div><strong>5</strong><span>chương trình sang Đức</span></div>
@@ -299,7 +298,7 @@ function renderHome() {
     <section class="bx-cta reveal">
       <div class="container bx-cta-inner">
         <p class="bx-kicker">Sẵn sàng?</p>
-        <h2>Hành trình sang Đức của bạn <em>bắt đầu hôm nay</em>.</h2>
+        <h2 data-i18n-html="home-cta">Hành trình sang Đức của bạn <em>bắt đầu hôm nay</em>.</h2>
         <p class="bx-cta-lead">Để lại thông tin, DCC sẽ tư vấn miễn phí và đúng diện cho bạn — minh bạch ngay từ cuộc gọi đầu tiên.</p>
         <div class="bx-actions bx-actions-center">
           <a class="btn primary bx-btn-lg" href="#/don-hang">Đăng ký tư vấn miễn phí</a>
@@ -845,44 +844,215 @@ function bindInteractions() {
   bindHomeExperience();
 }
 
-// Hiệu ứng trang chủ: nghiêng huy hiệu theo chuột + lộ dần khi cuộn.
+// Hiệu ứng trang chủ: địa cầu mạng lưới 3D + thẻ kính theo chuột + lộ dần khi cuộn.
 function bindHomeExperience() {
-  const stage = $('.bx-stage');
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const stage = $('.bx-stage');
+  const canvas = $('.bx-globe');
 
-  // Nghiêng 3D theo con trỏ (chỉ trên thiết bị có chuột, không reduce-motion).
-  if (stage && !reduce && window.matchMedia('(pointer: fine)').matches) {
-    const hero = $('.bx-hero');
-    hero.addEventListener('pointermove', (e) => {
-      const r = hero.getBoundingClientRect();
-      const px = (e.clientX - r.left) / r.width - 0.5;
-      const py = (e.clientY - r.top) / r.height - 0.5;
-      stage.style.setProperty('--rx', `${(-py * 14).toFixed(2)}deg`);
-      stage.style.setProperty('--ry', `${(px * 18).toFixed(2)}deg`);
-      stage.style.setProperty('--mx', `${(px * 26).toFixed(1)}px`);
-      stage.style.setProperty('--my', `${(py * 26).toFixed(1)}px`);
-    });
-    hero.addEventListener('pointerleave', () => {
-      stage.style.setProperty('--rx', '0deg');
-      stage.style.setProperty('--ry', '0deg');
-      stage.style.setProperty('--mx', '0px');
-      stage.style.setProperty('--my', '0px');
-    });
-  }
+  // Dọn instance địa cầu cũ (tránh chạy nhiều vòng lặp khi đổi trang).
+  if (window.__bxGlobe) { window.__bxGlobe.destroy(); window.__bxGlobe = null; }
+  if (canvas) window.__bxGlobe = startGlobe(canvas, stage, reduce);
 
   // Lộ dần các phân cảnh khi cuộn tới.
   const reveals = $$('.reveal');
-  if (!reveals.length) return;
-  if (reduce || !('IntersectionObserver' in window)) {
-    reveals.forEach((el) => el.classList.add('in'));
-    return;
+  if (reveals.length) {
+    if (reduce || !('IntersectionObserver' in window)) {
+      reveals.forEach((el) => el.classList.add('in'));
+    } else {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) { entry.target.classList.add('in'); io.unobserve(entry.target); }
+        });
+      }, { threshold: 0.16, rootMargin: '0px 0px -8% 0px' });
+      reveals.forEach((el) => io.observe(el));
+    }
   }
-  const io = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) { entry.target.classList.add('in'); io.unobserve(entry.target); }
+}
+
+// Vẽ địa cầu mạng lưới xoay (canvas 2D, tự chiếu 3D) + cung sáng Việt Nam → Đức.
+function startGlobe(canvas, stage, reduce) {
+  const ctx = canvas.getContext('2d');
+  let W = 0, H = 0, cx = 0, cy = 0, R = 0, DPR = 1;
+  let raf = 0, tick = 0, rot = 0.6, mx = 0, my = 0, tmx = 0, tmy = 0, alive = true;
+  const TILT = -0.42;
+
+  // Chấm phân bố đều trên mặt cầu (xoắn Fibonacci).
+  const dots = [];
+  const N = 560;
+  for (let i = 0; i < N; i++) {
+    const y = 1 - (i / (N - 1)) * 2;
+    const r = Math.sqrt(Math.max(0, 1 - y * y));
+    const th = i * 2.399963229728653;
+    dots.push([Math.cos(th) * r, y, Math.sin(th) * r]);
+  }
+  // Lưới kinh tuyến + vĩ tuyến (cảm giác wireframe công nghệ).
+  const rings = [];
+  for (let m = 0; m < 12; m++) {
+    const lon = (m / 12) * Math.PI * 2, ring = [];
+    for (let k = 0; k <= 50; k++) {
+      const la = -Math.PI / 2 + (k / 50) * Math.PI;
+      ring.push([Math.cos(la) * Math.sin(lon), Math.sin(la), Math.cos(la) * Math.cos(lon)]);
+    }
+    rings.push(ring);
+  }
+  for (let p = 1; p < 6; p++) {
+    const la = -Math.PI / 2 + (p / 6) * Math.PI, rr = Math.cos(la), yy = Math.sin(la), ring = [];
+    for (let k = 0; k <= 50; k++) {
+      const lo = (k / 50) * Math.PI * 2;
+      ring.push([rr * Math.sin(lo), yy, rr * Math.cos(lo)]);
+    }
+    rings.push(ring);
+  }
+  const ll = (lat, lon) => {
+    const la = lat * Math.PI / 180, lo = lon * Math.PI / 180;
+    return [Math.cos(la) * Math.sin(lo), Math.sin(la), Math.cos(la) * Math.cos(lo)];
+  };
+  const VN = ll(16, 108), DE = ll(51, 10);
+  // Cung lớn (great-circle slerp) nối VN → DE, nâng nhẹ khỏi mặt cầu.
+  const arc = [];
+  const dotp = VN[0] * DE[0] + VN[1] * DE[1] + VN[2] * DE[2];
+  const omega = Math.acos(Math.max(-1, Math.min(1, dotp))) || 1e-3;
+  const so = Math.sin(omega) || 1;
+  for (let k = 0; k <= 64; k++) {
+    const t = k / 64;
+    const a = Math.sin((1 - t) * omega) / so, b = Math.sin(t * omega) / so;
+    let x = a * VN[0] + b * DE[0], y = a * VN[1] + b * DE[1], z = a * VN[2] + b * DE[2];
+    const len = Math.hypot(x, y, z) || 1, lift = 1 + 0.18 * Math.sin(Math.PI * t);
+    arc.push([x / len * lift, y / len * lift, z / len * lift]);
+  }
+
+  const rotY = (p, c, s) => [c * p[0] + s * p[2], p[1], -s * p[0] + c * p[2]];
+  const rotX = (p, c, s) => [p[0], c * p[1] - s * p[2], s * p[1] + c * p[2]];
+
+  function resize() {
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    const r = canvas.getBoundingClientRect();
+    W = r.width; H = r.height;
+    if (!W || !H) return;
+    canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    cx = W / 2; cy = H / 2; R = Math.min(W, H) * 0.40;
+  }
+
+  function frame() {
+    if (!alive) return;
+    tick++;
+    if (!reduce) rot += 0.0024;
+    mx += (tmx - mx) * 0.06; my += (tmy - my) * 0.06;
+    const cyr = Math.cos(rot + mx), syr = Math.sin(rot + mx);
+    const cxr = Math.cos(TILT + my), sxr = Math.sin(TILT + my);
+    const P = (p) => {
+      let q = rotY(p, cyr, syr); q = rotX(q, cxr, sxr);
+      const pe = 1 / (1 - q[2] * 0.32);
+      return { x: cx + q[0] * R * pe, y: cy + q[1] * R * pe, z: q[2], s: pe };
+    };
+    ctx.clearRect(0, 0, W, H);
+    if (!W || !H) { raf = requestAnimationFrame(frame); return; }
+
+    // Hào quang khí quyển.
+    const g = ctx.createRadialGradient(cx - R * 0.35, cy - R * 0.4, R * 0.1, cx, cy, R * 1.3);
+    g.addColorStop(0, 'rgba(46,92,158,0.50)');
+    g.addColorStop(0.6, 'rgba(18,44,84,0.30)');
+    g.addColorStop(1, 'rgba(8,18,36,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(cx, cy, R * 1.22, 0, 6.2832); ctx.fill();
+    ctx.strokeStyle = 'rgba(120,170,230,0.18)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(cx, cy, R * 1.02, 0, 6.2832); ctx.stroke();
+
+    // Lưới (chỉ vẽ đoạn ở mặt trước để thấy chiều sâu).
+    ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(96,138,198,0.16)';
+    for (const ring of rings) {
+      ctx.beginPath();
+      let started = false;
+      for (const p of ring) {
+        const pr = P(p);
+        if (pr.z <= -0.04) { started = false; continue; }
+        if (!started) { ctx.moveTo(pr.x, pr.y); started = true; } else ctx.lineTo(pr.x, pr.y);
+      }
+      ctx.stroke();
+    }
+
+    // Chấm: sáng dần về mặt trước.
+    for (const d of dots) {
+      const pr = P(d);
+      const front = pr.z > 0;
+      const a = front ? 0.30 + 0.55 * pr.z : 0.10;
+      ctx.fillStyle = front ? `rgba(190,212,245,${a})` : `rgba(120,150,205,${a})`;
+      ctx.beginPath(); ctx.arc(pr.x, pr.y, (front ? 1.6 : 1.05) * pr.s, 0, 6.2832); ctx.fill();
+    }
+
+    // Cung sáng VN → DE.
+    ctx.lineWidth = 2.1; ctx.strokeStyle = 'rgba(220,181,98,0.9)';
+    ctx.shadowColor = 'rgba(220,181,98,0.85)'; ctx.shadowBlur = 9;
+    ctx.beginPath();
+    let st = false;
+    for (const p of arc) {
+      const pr = P(p);
+      if (pr.z < -0.18) { st = false; continue; }
+      if (!st) { ctx.moveTo(pr.x, pr.y); st = true; } else ctx.lineTo(pr.x, pr.y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    // Xung sáng chạy dọc cung.
+    const phase = (tick % 200) / 200;
+    const ai = Math.floor(phase * (arc.length - 1));
+    const ap = P(arc[ai]);
+    if (ap.z > -0.18) {
+      ctx.fillStyle = 'rgba(255,247,226,0.98)';
+      ctx.shadowColor = 'rgba(255,236,180,0.95)'; ctx.shadowBlur = 14;
+      ctx.beginPath(); ctx.arc(ap.x, ap.y, 3.2 * ap.s, 0, 6.2832); ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    // Mốc Việt Nam & Đức.
+    [[VN, 'VN'], [DE, 'DE']].forEach(([m, label]) => {
+      const pr = P(m);
+      if (pr.z < 0.02) return;
+      ctx.fillStyle = '#ecca7d';
+      ctx.beginPath(); ctx.arc(pr.x, pr.y, 3.6 * pr.s, 0, 6.2832); ctx.fill();
+      const pl = (tick % 90) / 90;
+      ctx.strokeStyle = `rgba(236,202,125,${0.55 * (1 - pl)})`; ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.arc(pr.x, pr.y, (4 + pl * 12) * pr.s, 0, 6.2832); ctx.stroke();
+      ctx.fillStyle = 'rgba(245,237,224,0.92)';
+      ctx.font = '600 11px "Be Vietnam Pro", system-ui, sans-serif';
+      ctx.fillText(label, pr.x + 10, pr.y + 3);
     });
-  }, { threshold: 0.16, rootMargin: '0px 0px -8% 0px' });
-  reveals.forEach((el) => io.observe(el));
+
+    raf = requestAnimationFrame(frame);
+  }
+
+  // Tương tác chuột: xoay nhẹ địa cầu + dịch thẻ kính theo chiều sâu.
+  let onMove = null, onLeave = null;
+  const hero = $('.bx-hero');
+  if (hero && !reduce && window.matchMedia('(pointer: fine)').matches) {
+    onMove = (e) => {
+      const r = hero.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      tmx = px * 0.6; tmy = py * 0.4;
+      if (stage) { stage.style.setProperty('--mx', `${(px * 24).toFixed(1)}px`); stage.style.setProperty('--my', `${(py * 24).toFixed(1)}px`); }
+    };
+    onLeave = () => { tmx = 0; tmy = 0; if (stage) { stage.style.setProperty('--mx', '0px'); stage.style.setProperty('--my', '0px'); } };
+    hero.addEventListener('pointermove', onMove);
+    hero.addEventListener('pointerleave', onLeave);
+  }
+
+  const ro = ('ResizeObserver' in window) ? new ResizeObserver(resize) : null;
+  if (ro) ro.observe(canvas); else window.addEventListener('resize', resize);
+  resize();
+  raf = requestAnimationFrame(frame);
+
+  return {
+    destroy() {
+      alive = false;
+      cancelAnimationFrame(raf);
+      if (ro) ro.disconnect(); else window.removeEventListener('resize', resize);
+      if (hero && onMove) hero.removeEventListener('pointermove', onMove);
+      if (hero && onLeave) hero.removeEventListener('pointerleave', onLeave);
+    },
+  };
 }
 
 // ===== Tài khoản (đăng ký / đăng nhập có mật khẩu) =====
