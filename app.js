@@ -247,6 +247,7 @@ function renderHome() {
 
     <section class="bx-manifesto" id="bx-manifesto">
       <div class="container">
+        <div class="scene-rule" aria-hidden="true"></div>
         <div class="bx-section-head">
           <p class="bx-kicker">Kim chỉ nam</p>
           <h2>Tiêu chí hành động của DCC</h2>
@@ -269,6 +270,7 @@ function renderHome() {
     <section class="bx-bridge">
       <div class="bx-aurora bx-aurora-soft" aria-hidden="true"></div>
       <div class="container bx-bridge-inner">
+        <div class="scene-rule" aria-hidden="true"></div>
         <p class="bx-kicker bx-kicker-light">Cầu nối Việt Nam – Đức</p>
         <h2 class="bx-bridge-title" data-i18n-html="home-bridge">Một cây cầu vững chãi giữa hai bờ — nơi <em>ước mơ</em> gặp <em>cơ hội</em>.</h2>
         <div class="bx-bridge-arc">
@@ -296,6 +298,7 @@ function renderHome() {
 
     <section class="bx-cta">
       <div class="container bx-cta-inner">
+        <div class="scene-rule" aria-hidden="true"></div>
         <p class="bx-kicker">Sẵn sàng?</p>
         <h2 data-i18n-html="home-cta">Hành trình sang Đức của bạn <em>bắt đầu hôm nay</em>.</h2>
         <p class="bx-cta-lead">Để lại thông tin, DCC sẽ tư vấn miễn phí và đúng diện cho bạn — minh bạch ngay từ cuộc gọi đầu tiên.</p>
@@ -892,6 +895,16 @@ function bindScrollScenes(reduce) {
   ['.timeline', '.risk-list', '.filters', '.portal-grid'].forEach((s) => group(s, 'up'));
   // Khối đơn lẻ ở các trang.
   ['.wish-form', '.lead-form', '.register-grid', '.detail-grid', '.login-card', '.lookup-card', '.profile-card', '.aw-card', '.partner-portal .compact-form'].forEach((s) => $$(s).forEach((el) => add(el, 'up')));
+
+  // Đường kẻ ngăn cách: chèn thêm trước mỗi tiêu đề mục (trang khác), rồi đăng ký vẽ-ra.
+  $$('.section-head').forEach((head) => {
+    const prev = head.previousElementSibling;
+    if (prev && prev.classList.contains('scene-rule')) return;
+    const d = document.createElement('div');
+    d.className = 'scene-rule'; d.setAttribute('aria-hidden', 'true');
+    head.parentNode.insertBefore(d, head);
+  });
+  $$('.scene-rule').forEach((el) => add(el));
 
   // Band cung cầu — chỉ bật keyframe vẽ cung, không ẩn nội dung.
   $$('.bx-bridge').forEach((el) => { if (reduce) el.classList.add('is-in'); else triggers.push(el); });

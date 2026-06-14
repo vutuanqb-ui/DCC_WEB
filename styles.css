@@ -731,6 +731,25 @@ body.nav-open .menu-toggle-text { color: #e9d9b4; }
 
 .fx.is-in { opacity: 1; transform: none; filter: none; clip-path: inset(0 0 0 0); }
 
+/* Đường gạch ngang ngăn cách — vẽ ra từ giữa + điểm sáng vàng nảy lên khi cuộn tới */
+.scene-rule { position: relative; width: min(680px, 78%); height: 1px; margin: 0 auto var(--s5);
+  background: linear-gradient(90deg, transparent, rgba(184, 138, 62, .55), transparent);
+  transform: scaleX(0); opacity: 0; will-change: transform, opacity;
+  transition: transform 1.25s var(--exp), opacity .7s ease; }
+.scene-rule::after { content: ""; position: absolute; left: 50%; top: 50%;
+  width: 6px; height: 6px; border-radius: 50%; background: var(--gold-bright);
+  box-shadow: 0 0 12px 2px rgba(216, 177, 94, .7); transform: translate(-50%, -50%) scale(0);
+  transition: transform .55s var(--exp) .5s; }
+.scene-rule.is-in { transform: scaleX(1); opacity: 1; }
+.scene-rule.is-in::after { transform: translate(-50%, -50%) scale(1); }
+.bx-bridge .scene-rule { background: linear-gradient(90deg, transparent, rgba(216, 177, 94, .6), transparent); }
+
+/* Gạch vàng ở nhãn mục (eyebrow/kicker) tự vẽ ra khi khối lộ */
+.eyebrow.fx-up::before { transform: scaleX(0); transform-origin: left center; transition: transform 1s var(--exp) .25s; }
+.bx-kicker.fx-up::before { transform: scaleX(0); transform-origin: right center; transition: transform 1s var(--exp) .25s; }
+.bx-kicker.fx-up::after { transform: scaleX(0); transform-origin: left center; transition: transform 1s var(--exp) .25s; }
+.eyebrow.fx-up.is-in::before, .bx-kicker.fx-up.is-in::before, .bx-kicker.fx-up.is-in::after { transform: scaleX(1); }
+
 /* Parallax chiều sâu theo cuộn (trình duyệt hỗ trợ scroll-timeline) */
 @supports (animation-timeline: view()) {
   @media (prefers-reduced-motion: no-preference) {
@@ -906,6 +925,6 @@ body.nav-open .menu-toggle-text { color: #e9d9b4; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
-  .bx-hero-copy > *, .bx-stage, .fx { opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important; }
+  .bx-hero-copy > *, .bx-stage, .fx, .scene-rule { opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important; }
   .bx-arc-path { stroke-dashoffset: 0 !important; }
 }
