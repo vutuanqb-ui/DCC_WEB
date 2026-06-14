@@ -204,7 +204,7 @@ function renderHome() {
           <p class="hero-text">Deutsch Connect Center đồng hành cùng bạn trọn hành trình: học tiếng Đức, du học nghề, chuyển đổi văn bằng 18B/18A, Au-pair, thời vụ, hồ sơ visa và kết nối việc làm tại Đức.</p>
           <div class="hero-actions">
             <a class="btn primary" href="#/dang-ky">Đăng ký tư vấn ngay</a>
-            <a class="btn secondary" href="#/don-hang">Xem đơn hàng đang tuyển</a>
+            <a class="btn secondary" href="#/don-hang">Chọn chương trình mong muốn</a>
             <a class="btn ghost" href="#/tra-cuu-ho-so">Tra cứu tiến độ hồ sơ</a>
           </div>
           <div class="trust-row">
@@ -225,7 +225,7 @@ function renderHome() {
       </div>
     </section>
     ${renderProgramsSection()}
-    ${renderOrdersSection()}
+    ${renderWishSection()}
     ${renderProcessSection()}
     ${renderRisksSection(true)}
     ${renderGallerySection()}
@@ -254,44 +254,76 @@ function renderProgramCard(item) {
   </article>`;
 }
 
-function renderOrdersSection() {
+// Ngành nghề nước Đức đang cần, theo từng chương trình. Au-pair & Học tiếng không có ngành nghề.
+const GERMANY_CAREERS = {
+  'Du học nghề Đức': ['Điều dưỡng – chăm sóc người cao tuổi', 'Nhà hàng – khách sạn', 'Đầu bếp', 'Làm bánh', 'Chế biến thịt', 'Bán hàng – bán lẻ', 'Logistics – kho vận', 'Cơ khí – cơ điện tử', 'Điện – điện tử', 'Xây dựng', 'Sơn – hoàn thiện công trình', 'Cơ khí ô tô', 'Công nghệ thông tin', 'Trợ lý nha khoa', 'Cắt tóc – làm đẹp', 'Giáo dục mầm non', 'Nông nghiệp – làm vườn', 'Lái xe tải', 'Hàn – gia công kim loại'],
+  'Chuyển đổi văn bằng 18B/18A': ['Điều dưỡng – y tế', 'Bác sĩ', 'Dược sĩ', 'Kỹ sư cơ khí', 'Kỹ sư điện – tự động hóa', 'Kỹ sư xây dựng', 'Kỹ sư ô tô', 'Công nghệ thông tin (IT)', 'Hàn – gia công kim loại', 'Kế toán – tài chính', 'Quản lý nhà hàng – khách sạn', 'Logistics', 'Kiến trúc', 'Giáo viên – sư phạm'],
+  'Thời vụ 8 tháng': ['Nông nghiệp – thu hoạch', 'Làm vườn – trồng trọt', 'Chế biến thực phẩm', 'Đóng gói – kho', 'Nhà hàng – khách sạn mùa vụ']
+};
+
+// 16 bang + các thành phố lớn của Đức cho ô địa điểm mong muốn.
+const GERMANY_STATES = ['Baden-Württemberg', 'Bayern', 'Berlin', 'Brandenburg', 'Bremen', 'Hamburg', 'Hessen', 'Mecklenburg-Vorpommern', 'Niedersachsen', 'Nordrhein-Westfalen', 'Rheinland-Pfalz', 'Saarland', 'Sachsen', 'Sachsen-Anhalt', 'Schleswig-Holstein', 'Thüringen'];
+const GERMANY_CITIES = ['München', 'Köln', 'Frankfurt am Main', 'Stuttgart', 'Düsseldorf', 'Leipzig', 'Dortmund', 'Essen', 'Dresden', 'Hannover', 'Nürnberg', 'Duisburg', 'Bochum', 'Wuppertal', 'Bielefeld', 'Bonn', 'Münster', 'Mannheim', 'Karlsruhe', 'Augsburg', 'Wiesbaden', 'Mönchengladbach', 'Aachen', 'Braunschweig', 'Kiel', 'Freiburg', 'Magdeburg', 'Mainz', 'Lübeck', 'Erfurt', 'Rostock', 'Kassel', 'Saarbrücken', 'Potsdam'];
+
+function renderGermanyOptions() {
+  return `<option value="">Chưa rõ / linh hoạt</option>
+    <optgroup label="Theo bang (Bundesland)">${GERMANY_STATES.map((s) => `<option>${s}</option>`).join('')}</optgroup>
+    <optgroup label="Theo thành phố">${GERMANY_CITIES.map((c) => `<option>${c}</option>`).join('')}</optgroup>`;
+}
+
+function renderWishSection() {
   return `
-    <section class="section orders-section" id="orders">
+    <section class="section wish-section" id="orders">
       <div class="container">
-        ${sectionHeader('Đơn hàng', 'Cơ hội đang tuyển tại Đức', 'Mỗi đơn ghi rõ điều kiện, mức hỗ trợ, yêu cầu tiếng và thời gian dự kiến. Lọc theo nhu cầu để tìm đúng cơ hội của bạn.')}
-        ${renderFilters()}
-        <div id="ordersList" class="orders-list"></div>
+        ${sectionHeader('Đăng ký nguyện vọng', 'Đăng ký chương trình & công việc bạn mong muốn', 'Chọn chương trình, ngành nghề và nơi bạn muốn đến tại Đức. DCC sẽ tìm hợp đồng phù hợp và liên hệ tư vấn miễn phí.')}
+        <form id="wishForm" class="lead-form wish-form" novalidate>
+          <div class="wish-grid">
+            <label>Chương trình mong muốn
+              <select name="program_interest" data-wish-program required>
+                <option value="">— Chọn chương trình —</option>
+                <option value="Du học nghề Đức">Du học nghề Đức (Ausbildung)</option>
+                <option value="Chuyển đổi văn bằng 18B/18A">Chuyển đổi văn bằng 18B/18A</option>
+                <option value="Au-pair Đức">Au-pair Đức</option>
+                <option value="Thời vụ 8 tháng">Thời vụ 8 tháng</option>
+                <option value="Học tiếng Đức">Học tiếng Đức</option>
+              </select>
+            </label>
+            <label data-wish-career-field hidden>Ngành nghề mong muốn
+              <select name="desired_career" data-wish-career><option value="">— Chọn ngành nghề —</option></select>
+            </label>
+            <label>Bang / thành phố mong muốn
+              <select name="desired_location">${renderGermanyOptions()}</select>
+            </label>
+            <label>Trình độ tiếng Đức hiện tại
+              <select name="german_level"><option>Chưa học</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option></select>
+            </label>
+            <label>Thời gian mong muốn đi
+              <input name="desired_departure" placeholder="Ví dụ: cuối 2026, sau khi đạt B1…" />
+            </label>
+            <label>Họ và tên
+              <input name="full_name" required placeholder="Nguyễn Văn A" />
+            </label>
+            <label>Số điện thoại / Zalo
+              <input name="phone" required placeholder="09xxxxxxxx" />
+            </label>
+            <label>Email
+              <input name="email" type="email" placeholder="email@example.com" />
+            </label>
+            <label>Tỉnh/thành (tại Việt Nam)
+              <input name="province" placeholder="Ví dụ: Quảng Trị" />
+            </label>
+            <label class="wish-note">Ghi chú thêm
+              <textarea name="note" rows="2" placeholder="Mong muốn cụ thể về hợp đồng, ngành nghề, mức lương…"></textarea>
+            </label>
+          </div>
+          <div class="wish-actions">
+            <button class="btn primary" type="submit">Gửi đăng ký nguyện vọng</button>
+            <span class="secure-inline">🔒 Thông tin được bảo mật, chỉ dùng để tư vấn lộ trình phù hợp.</span>
+          </div>
+          <p id="wishMessage" class="form-message" role="status"></p>
+        </form>
       </div>
     </section>`;
-}
-
-function renderFilters() {
-  const options = (items) => ['Tất cả', ...new Set(items)].map((item) => `<option>${item}</option>`).join('');
-  return `<div class="filters" aria-label="Bộ lọc đơn hàng">
-    <label>Loại chương trình<select data-filter="program">${options(ORDERS.map((o) => o.program))}</select></label>
-    <label>Ngành nghề<select data-filter="career">${options(ORDERS.map((o) => o.career))}</select></label>
-    <label>Bang/thành phố<select data-filter="location">${options(ORDERS.map((o) => o.location))}</select></label>
-    <label>Yêu cầu tiếng Đức<select data-filter="language">${options(ORDERS.map((o) => o.language))}</select></label>
-    <label>Thời gian<select data-filter="intake">${options(ORDERS.map((o) => o.intake))}</select></label>
-    <label>Trạng thái<select data-filter="status">${options(ORDERS.map((o) => o.status))}</select></label>
-  </div>`;
-}
-
-function renderOrderCards(list = ORDERS) {
-  return list.map((item) => `<article class="order-card">
-    <div class="order-top"><span class="badge ${item.status === 'Sắp hết' ? 'warning' : ''}">${item.status}</span><span>${item.program}</span></div>
-    <h3>${item.title}</h3>
-    <p>${item.highlight}</p>
-    <div class="order-meta">
-      <div><b>Địa điểm</b><span>${item.location}</span></div>
-      <div><b>Ngành/nghề</b><span>${item.career}</span></div>
-      <div><b>Số lượng</b><span>${item.seats}</span></div>
-      <div><b>Lương/hỗ trợ</b><span>${item.salary}</span></div>
-      <div><b>Tiếng Đức</b><span>${item.language}</span></div>
-      <div><b>Thời gian</b><span>${item.intake}</span></div>
-    </div>
-    <div class="card-actions"><a class="btn secondary" href="#/don-hang/${item.id}">Xem chi tiết</a><a class="btn primary" href="#/dang-ky?order=${item.id}">Đăng ký đơn này</a></div>
-  </article>`).join('');
 }
 
 function renderProcessSection() {
@@ -357,7 +389,7 @@ function renderLeadForm() {
   </form>`;
 }
 
-function renderOrdersPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Đơn hàng</p><h1>Cơ hội đang tuyển tại Đức</h1><p>Cơ hội học nghề, làm việc và trải nghiệm tại Đức — kèm bộ lọc theo đúng nhu cầu của bạn.</p></div></section>${renderOrdersSection()}`; }
+function renderOrdersPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Đăng ký nguyện vọng</p><h1>Đăng ký chương trình & công việc mong muốn</h1><p>Cho DCC biết bạn muốn theo chương trình nào, làm ngành nghề gì và ở đâu trên nước Đức — chúng tôi sẽ tìm hợp đồng phù hợp và liên hệ tư vấn miễn phí.</p></div></section>${renderWishSection()}`; }
 function renderProgramsPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Chương trình</p><h1>Chọn đúng diện trước khi chuẩn bị hồ sơ</h1><p>DCC đánh giá điều kiện thực tế của bạn để tư vấn đúng diện — không hứa hẹn quá đà, không vẽ kỳ vọng sai.</p></div></section>${renderProgramsSection()}`; }
 function renderRegisterPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Đăng ký</p><h1>Đăng ký tư vấn miễn phí</h1><p>Gửi thông tin xong, bạn nhận ngay một mã tra cứu để theo dõi và trao đổi với DCC trong suốt quá trình xử lý hồ sơ.</p></div></section>${renderRegisterSection()}`; }
 function renderRisksPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Minh bạch</p><h1>Những rủi ro nên biết trước khi bắt đầu</h1><p>Chúng tôi trình bày rủi ro một cách nghiêm túc để bạn chuẩn bị đúng, thay vì tạo kỳ vọng sai.</p></div></section>${renderRisksSection(false)}`; }
@@ -393,19 +425,55 @@ function renderLookupPage() { return `<section class="page-hero"><div class="con
 function renderAboutContact(path) { return `<section class="page-hero"><div class="container"><p class="eyebrow">${path === '/gioi-thieu' ? 'Giới thiệu' : 'Liên hệ'}</p><h1>Deutsch Connect Center</h1><p>Trung tâm hỗ trợ học tiếng Đức, tuyển sinh du học nghề, chuyển đổi văn bằng 18B/18A, Au-pair, thời vụ 8 tháng, hồ sơ visa và kết nối đối tác tại Đức.</p></div></section>${renderWhySection()}${renderRegisterSection()}`; }
 
 function bindInteractions() {
-  const ordersList = $('#ordersList');
-  if (ordersList) {
-    const applyFilters = () => {
-      const values = Object.fromEntries($$('[data-filter]').map((select) => [select.dataset.filter, select.value]));
-      const filtered = ORDERS.filter((order) => Object.entries(values).every(([key, value]) => value === 'Tất cả' || order[key] === value));
-      ordersList.innerHTML = filtered.length ? renderOrderCards(filtered) : '<p class="empty-state">Chưa có đơn phù hợp bộ lọc. Vui lòng chọn lại hoặc đăng ký tư vấn.</p>';
-    };
-    $$('[data-filter]').forEach((select) => select.addEventListener('change', applyFilters));
-    applyFilters();
-  }
+  const wishForm = $('#wishForm');
+  if (wishForm) bindWishForm(wishForm);
 
   const form = $('#leadForm');
   if (form) bindLeadForm(form);
+}
+
+function bindWishForm(form) {
+  const programSel = $('[data-wish-program]', form);
+  const careerField = $('[data-wish-career-field]', form);
+  const careerSel = $('[data-wish-career]', form);
+  const syncCareer = () => {
+    const list = GERMANY_CAREERS[programSel.value];
+    if (list && list.length) {
+      careerSel.innerHTML = '<option value="">— Chọn ngành nghề —</option>' + list.map((c) => `<option>${c}</option>`).join('');
+      careerField.hidden = false;
+    } else {
+      careerSel.innerHTML = '<option value="">— Chọn ngành nghề —</option>';
+      careerField.hidden = true;
+    }
+  };
+  programSel.addEventListener('change', syncCareer);
+  syncCareer();
+  form.addEventListener('submit', submitWish);
+}
+
+async function submitWish(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const msg = $('#wishMessage');
+  const setMsg = (text, type = '') => { if (msg) { msg.textContent = text; msg.className = `form-message ${type}`; } };
+  const payload = Object.fromEntries(new FormData(form).entries());
+  if (!payload.program_interest) { setMsg('Vui lòng chọn chương trình bạn mong muốn.', 'error'); return; }
+  if (!payload.full_name || !payload.phone) { setMsg('Vui lòng điền họ tên và số điện thoại để DCC liên hệ lại.', 'error'); return; }
+  payload.source = 'Website – Đăng ký nguyện vọng';
+  payload.status = 'Khách mới đăng ký';
+  payload.lookup_code = `DCC-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  try {
+    setMsg('Đang gửi đăng ký...', '');
+    const result = await submitLeadToNotion(payload);
+    if (result && result.lookup_code) payload.lookup_code = result.lookup_code;
+    form.reset();
+    const careerField = $('[data-wish-career-field]', form);
+    if (careerField) careerField.hidden = true;
+    setMsg(`Cảm ơn anh/chị! DCC đã nhận nguyện vọng và sẽ liên hệ tư vấn sớm. Mã tra cứu của bạn: ${payload.lookup_code}`, 'success');
+  } catch (error) {
+    console.error(error);
+    setMsg('Hiện chưa gửi được. Anh/chị vui lòng thử lại, hoặc liên hệ hotline/Zalo 076 778 7879 để được hỗ trợ nhanh.', 'error');
+  }
 }
 
 function bindLeadForm(form) {

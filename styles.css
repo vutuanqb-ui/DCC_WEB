@@ -273,6 +273,20 @@ p:last-child { margin-bottom: 0; }
 .card-actions .btn { flex: 1; min-width: 140px; min-height: 44px; font-size: 14px; padding: 11px 16px; }
 .empty-state { grid-column: 1 / -1; padding: var(--s4); background: var(--gold-soft); border-radius: var(--r-md); font-weight: 500; text-align: center; color: var(--amber); }
 
+/* ---------- Đăng ký nguyện vọng ---------- */
+.wish-section { background: var(--paper); }
+.wish-form { display: block; padding: var(--s5); box-shadow: var(--shadow-md); border-radius: var(--r-xl); }
+.wish-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s3); }
+.wish-form label { display: block; }
+.wish-form label[hidden] { display: none !important; }
+.wish-form .wish-note { grid-column: 1 / -1; }
+.wish-actions { display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap; margin-top: var(--s4); }
+.wish-actions .btn { min-width: 240px; }
+.secure-inline { color: var(--muted); font-size: 13.5px; }
+#wishMessage { margin-top: var(--s2); }
+@media (max-width: 860px) { .wish-grid { grid-template-columns: 1fr 1fr; } .wish-form { padding: var(--s4); } .wish-actions .btn { width: 100%; min-width: 0; } }
+@media (max-width: 560px) { .wish-grid { grid-template-columns: 1fr; } }
+
 /* ---------- Quy trình ---------- */
 .process-section { background: linear-gradient(180deg, var(--bg), var(--paper)); }
 .timeline { display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--s2); }
