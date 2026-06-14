@@ -320,6 +320,28 @@ p:last-child { margin-bottom: 0; }
 .partner-card .login-foot { border-color: rgba(255,255,255,.14); color: #c4d1e3; }
 .partner-card .text-link { color: var(--gold-bright); }
 @media (max-width: 860px) { .login-grid { grid-template-columns: 1fr; } }
+.account-form .form-message { margin: 4px 0 0; }
+
+/* ---------- Đăng ký tài khoản (member/partner) ---------- */
+.account-tabs { display: inline-flex; gap: 6px; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 6px; margin-bottom: var(--s4); box-shadow: var(--shadow-sm); }
+.account-tab { border: 0; background: transparent; color: var(--muted); font-weight: 600; font-size: 15px; padding: 10px 22px; border-radius: var(--r-pill); cursor: pointer; transition: background .2s, color .2s; }
+.account-tab.active { background: linear-gradient(135deg, var(--navy-2), var(--navy)); color: #fff; }
+.account-form-full { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s5); box-shadow: var(--shadow-sm); }
+.form-section-title { font-family: "Playfair Display", serif; color: var(--navy); font-size: 19px; font-weight: 600; margin: 0 0 var(--s2); padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.account-form-full .form-section-title:not(:first-child) { margin-top: var(--s4); }
+.partner-type-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); margin-bottom: var(--s2); }
+.radio-card { display: flex; align-items: flex-start; gap: 11px; padding: var(--s3); border: 1px solid var(--line-cool); border-radius: var(--r-md); cursor: pointer; transition: border-color .2s, background .2s; font-weight: 500; }
+.radio-card:has(input:checked) { border-color: var(--gold); background: var(--gold-soft); }
+.radio-card input { margin-top: 3px; width: auto; }
+.radio-card span { display: grid; }
+.radio-card b { color: var(--navy); }
+.radio-card small { color: var(--muted); font-size: 12.5px; }
+.account-welcome { background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s5); box-shadow: var(--shadow-sm); }
+.aw-row { display: flex; justify-content: space-between; gap: var(--s3); padding: 13px 0; border-bottom: 1px solid var(--line); }
+.aw-row span { color: var(--muted); }
+.aw-row b { color: var(--navy); }
+.aw-actions { display: flex; gap: var(--s3); flex-wrap: wrap; margin-top: var(--s4); }
+@media (max-width: 720px) { .partner-type-row { grid-template-columns: 1fr; } .account-tabs { display: flex; width: 100%; } .account-tab { flex: 1; } .aw-actions .btn { width: 100%; } }
 
 /* ---------- Quy trình ---------- */
 .process-section { background: linear-gradient(180deg, var(--bg), var(--paper)); }
