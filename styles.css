@@ -149,6 +149,10 @@ p:last-child { margin-bottom: 0; }
 .menu-toggle { display: none; align-items: center; gap: 7px; margin-left: auto; border: 1px solid var(--gold); background: var(--gold-soft); border-radius: var(--r-pill); padding: 9px 16px 9px 13px; font-size: 16px; color: var(--navy); font-weight: 700; }
 .menu-toggle-text { font-family: "Be Vietnam Pro", sans-serif; font-size: 13px; letter-spacing: .1em; color: var(--amber); }
 .nav-cta { flex: 0 0 auto; font-size: 14px; min-height: 46px; padding: 11px 20px; }
+.lang-switch { display: inline-flex; gap: 2px; flex: 0 0 auto; background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-pill); padding: 3px; box-shadow: var(--shadow-sm); order: 6; }
+.lang-switch button { border: 0; background: transparent; cursor: pointer; font-family: "Be Vietnam Pro", sans-serif; font-weight: 700; font-size: 12.5px; letter-spacing: .03em; color: var(--muted); padding: 6px 9px; border-radius: var(--r-pill); line-height: 1; transition: color .2s, background .2s; }
+.lang-switch button:hover { color: var(--navy); }
+.lang-switch button.active { background: linear-gradient(135deg, var(--gold-bright), var(--gold)); color: #fff; }
 
 /* ---------- Hero ---------- */
 .hero, .page-hero {
@@ -591,7 +595,8 @@ th { color: var(--navy); font-weight: 600; font-size: 12.5px; text-transform: up
   }
   .nav-links.open { display: flex; }
   .nav-links a { padding: 12px 14px; }
-  .menu-toggle { display: inline-flex; }
+  .menu-toggle { display: inline-flex; margin-left: 8px; order: 7; }
+  .lang-switch { margin-left: auto; }
   .nav-cta { display: none; }
   .filters { grid-template-columns: repeat(3, 1fr); }
   .timeline { grid-template-columns: repeat(3, 1fr); }

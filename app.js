@@ -190,6 +190,7 @@ function renderPage() {
     root.innerHTML = path === '/chuong-trinh' ? renderProgramsPage() : renderProgramDetail(program || PROGRAMS[0]);
   }
   bindInteractions();
+  if (window.DCC_I18N) DCC_I18N.apply();
 }
 
 function sectionHeader(eyebrow, title, text = '') {
@@ -202,7 +203,7 @@ function renderHome() {
       <div class="container hero-grid">
         <div class="hero-content">
           <p class="eyebrow">Cầu nối Việt Nam – Đức</p>
-          <h1>Hành trình sang Đức <em>rõ ràng</em>, hồ sơ <em>minh bạch</em>, tương lai <em>vững vàng</em>.</h1>
+          <h1 data-i18n-html="hero-main">Hành trình sang Đức <em>rõ ràng</em>, hồ sơ <em>minh bạch</em>, tương lai <em>vững vàng</em>.</h1>
           <p class="hero-text">Deutsch Connect Center đồng hành cùng bạn trọn hành trình: học tiếng Đức, du học nghề, chuyển đổi văn bằng 18B/18A, Au-pair, thời vụ, hồ sơ visa và kết nối việc làm tại Đức.</p>
           <div class="hero-actions">
             <a class="btn primary" href="#/don-hang">Đăng ký tư vấn ngay</a>
@@ -958,6 +959,7 @@ function bindWishForm(form) {
       careerField.hidden = true;
     }
     if (block18) block18.hidden = programSel.value !== 'Chuyển đổi văn bằng 18B/18A';
+    if (window.DCC_I18N) DCC_I18N.apply();
   };
   programSel.addEventListener('change', syncFields);
   syncFields();
@@ -1004,6 +1006,7 @@ function bindJobTransferForm(form) {
     } else {
       careerSel.innerHTML = renderTransferOptions();
     }
+    if (window.DCC_I18N) DCC_I18N.apply();
   };
   dienSel.addEventListener('change', syncCareers);
   form.addEventListener('submit', submitJobTransfer);
@@ -1130,28 +1133,19 @@ async function submitLeadToNotion(payload) {
 $('.menu-toggle')?.addEventListener('click', (event) => {
   const nav = $('.nav-links');
   const open = nav.classList.toggle('open');
-  const btn = event.currentTarget;
-  btn.setAttribute('aria-expanded', open);
-  const icon = btn.querySelector('.menu-toggle-icon');
-  const text = btn.querySelector('.menu-toggle-text');
-  if (icon) icon.textContent = open ? '✕' : '☰';
-  if (text) text.textContent = open ? 'ĐÓNG' : 'MENU';
+  event.currentTarget.setAttribute('aria-expanded', open);
+  // Nhãn/icon nút menu để DCC_I18N.apply() cập nhật theo ngôn ngữ + trạng thái mở.
+  if (window.DCC_I18N) DCC_I18N.apply();
 });
 
-// Bấm chọn 1 mục trong menu mobile thì tự đóng lại + đưa nút về trạng thái "MENU".
+// Bấm chọn 1 mục trong menu mobile thì tự đóng lại.
 $('.nav-links')?.addEventListener('click', (event) => {
   if (!event.target.closest('a')) return;
   const nav = $('.nav-links');
   if (!nav.classList.contains('open')) return;
   nav.classList.remove('open');
-  const btn = $('.menu-toggle');
-  if (btn) {
-    btn.setAttribute('aria-expanded', 'false');
-    const icon = btn.querySelector('.menu-toggle-icon');
-    const text = btn.querySelector('.menu-toggle-text');
-    if (icon) icon.textContent = '☰';
-    if (text) text.textContent = 'MENU';
-  }
+  $('.menu-toggle')?.setAttribute('aria-expanded', 'false');
+  if (window.DCC_I18N) DCC_I18N.apply();
 });
 
 window.addEventListener('hashchange', renderPage);
