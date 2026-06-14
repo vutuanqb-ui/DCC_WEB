@@ -146,7 +146,8 @@ p:last-child { margin-bottom: 0; }
 .nav-links { display: flex; align-items: center; gap: 4px; margin-left: auto; font-size: 14px; font-weight: 500; color: #3a4253; }
 .nav-links a { padding: 9px 12px; border-radius: 10px; white-space: nowrap; transition: color .2s, background .2s; }
 .nav-links a:hover { color: var(--navy); background: rgba(184,138,62,.09); }
-.menu-toggle { display: none; margin-left: auto; border: 1px solid var(--line); background: var(--paper); border-radius: 12px; padding: 10px 13px; font-size: 17px; color: var(--navy); }
+.menu-toggle { display: none; align-items: center; gap: 7px; margin-left: auto; border: 1px solid var(--gold); background: var(--gold-soft); border-radius: var(--r-pill); padding: 9px 16px 9px 13px; font-size: 16px; color: var(--navy); font-weight: 700; }
+.menu-toggle-text { font-family: "Be Vietnam Pro", sans-serif; font-size: 13px; letter-spacing: .1em; color: var(--amber); }
 .nav-cta { flex: 0 0 auto; font-size: 14px; min-height: 46px; padding: 11px 20px; }
 
 /* ---------- Hero ---------- */
@@ -590,7 +591,7 @@ th { color: var(--navy); font-weight: 600; font-size: 12.5px; text-transform: up
   }
   .nav-links.open { display: flex; }
   .nav-links a { padding: 12px 14px; }
-  .menu-toggle { display: inline-block; }
+  .menu-toggle { display: inline-flex; }
   .nav-cta { display: none; }
   .filters { grid-template-columns: repeat(3, 1fr); }
   .timeline { grid-template-columns: repeat(3, 1fr); }

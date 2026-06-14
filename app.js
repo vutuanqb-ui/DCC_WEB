@@ -1129,8 +1129,29 @@ async function submitLeadToNotion(payload) {
 
 $('.menu-toggle')?.addEventListener('click', (event) => {
   const nav = $('.nav-links');
-  nav.classList.toggle('open');
-  event.currentTarget.setAttribute('aria-expanded', nav.classList.contains('open'));
+  const open = nav.classList.toggle('open');
+  const btn = event.currentTarget;
+  btn.setAttribute('aria-expanded', open);
+  const icon = btn.querySelector('.menu-toggle-icon');
+  const text = btn.querySelector('.menu-toggle-text');
+  if (icon) icon.textContent = open ? '✕' : '☰';
+  if (text) text.textContent = open ? 'ĐÓNG' : 'MENU';
+});
+
+// Bấm chọn 1 mục trong menu mobile thì tự đóng lại + đưa nút về trạng thái "MENU".
+$('.nav-links')?.addEventListener('click', (event) => {
+  if (!event.target.closest('a')) return;
+  const nav = $('.nav-links');
+  if (!nav.classList.contains('open')) return;
+  nav.classList.remove('open');
+  const btn = $('.menu-toggle');
+  if (btn) {
+    btn.setAttribute('aria-expanded', 'false');
+    const icon = btn.querySelector('.menu-toggle-icon');
+    const text = btn.querySelector('.menu-toggle-text');
+    if (icon) icon.textContent = '☰';
+    if (text) text.textContent = 'MENU';
+  }
 });
 
 window.addEventListener('hashchange', renderPage);
