@@ -169,8 +169,8 @@ function renderPage() {
     root.innerHTML = renderOrdersPage();
   } else if (path === '/dang-ky' || path === '/register') {
     root.innerHTML = renderRegisterPage();
-  } else if (path === '/hoc-vien' || path === '/portal') {
-    root.innerHTML = renderStudentPortal();
+  } else if (path === '/hoc-vien' || path === '/portal' || path === '/dang-nhap') {
+    root.innerHTML = renderLoginHub();
   } else if (path === '/partner') {
     root.innerHTML = renderPartnerPortal();
   } else if (path === '/app') {
@@ -422,12 +422,86 @@ function renderOrderDetail(id) {
   return `<section class="page-hero order-detail-hero"><div class="container"><p class="eyebrow">Chi tiết đơn hàng</p><h1>${order.title}</h1><p>${order.highlight}</p><div class="hero-actions"><a class="btn primary" href="#/dang-ky?order=${order.id}">Đăng ký tư vấn đơn này</a><a class="btn secondary" href="#/don-hang">Quay lại danh sách đơn</a></div></div></section><section class="section"><div class="container detail-grid"><article class="detail-main"><section><h2>Tổng quan chương trình</h2><p>${order.highlight}</p><div class="order-meta detail-meta"><div><b>Địa điểm</b><span>${order.location}</span></div><div><b>Công việc/ngành học</b><span>${order.career}</span></div><div><b>Số lượng</b><span>${order.seats}</span></div><div><b>Yêu cầu tiếng Đức</b><span>${order.language}</span></div><div><b>Thời gian dự kiến</b><span>${order.intake}</span></div><div><b>Chi phí/lương/hỗ trợ</b><span>${order.salary}</span></div></div></section>${block('Quyền lợi', order.benefits)}${block('Điều kiện tham gia', order.requirements)}${block('Hồ sơ cần chuẩn bị', order.documents)}${block('Rủi ro/các điểm cần lưu ý', order.risks)}<section><h2>Câu hỏi thường gặp</h2><details><summary>DCC có cam kết 100% visa không?</summary><p>Không. DCC không dùng ngôn ngữ bao đậu visa. Trung tâm hỗ trợ chuẩn bị hồ sơ nghiêm túc và minh bạch trạng thái xử lý.</p></details><details><summary>Có thể theo dõi tiến độ online không?</summary><p>Có. Khi hồ sơ được tạo trong hệ thống, học viên chỉ xem được thông tin của chính mình theo phân quyền.</p></details></section></article><aside class="detail-side"><h3>Lộ trình xử lý</h3>${PROCESS_STEPS.map(([no, title]) => `<p><b>${no}</b> ${title}</p>`).join('')}<a class="btn primary full" href="#/dang-ky">Đăng ký tư vấn</a></aside></div></section>`;
 }
 
-function renderStudentPortal() {
-  return `<section class="page-hero"><div class="container"><p class="eyebrow">Cổng học viên</p><h1>Hồ sơ cá nhân — chỉ riêng bạn xem được</h1><p>Đăng nhập bằng email hoặc số điện thoại đã đăng ký để xem hồ sơ, tiến độ học tiếng và lịch hẹn của riêng bạn.</p></div></section><section class="section"><div class="container portal-layout"><aside class="portal-card"><h2>Thông tin cá nhân</h2><p><b>Chương trình:</b> Du học nghề Đức</p><p><b>Trạng thái hiện tại:</b> Đang hoàn thiện hồ sơ</p><p><b>Deadline gần nhất:</b> Bổ sung hộ chiếu</p></aside><div><div class="stage-timeline">${PORTAL_STAGES.map((stage, idx) => `<span class="${idx <= 3 ? 'done' : ''}">${stage}</span>`).join('')}</div><div class="portal-grid">${['Checklist giấy tờ', 'Trạng thái học tiếng', 'Phỏng vấn', 'Hợp đồng', 'Visa', 'Lịch hẹn', 'Ghi chú được phép hiển thị', 'File cần bổ sung'].map((item) => `<article><h3>${item}</h3><p>Thông tin chi tiết sẽ hiển thị khi bạn đăng nhập tài khoản học viên.</p></article>`).join('')}</div></div></div></section>`;
+function renderLoginHub() {
+  return `<section class="page-hero"><div class="container"><p class="eyebrow">Đăng nhập / Đăng ký</p><h1>Cổng dành cho học viên & đối tác</h1><p>Chọn đúng cổng của bạn: học viên theo dõi hồ sơ của riêng mình, đối tác đồng hành cùng DCC đưa học viên Việt sang Đức.</p></div></section>
+  <section class="section"><div class="container login-grid">
+    <article class="login-card">
+      <span class="login-ico">🎓</span>
+      <h2>Học viên</h2>
+      <p class="muted">Đăng nhập để tra cứu hồ sơ, tiến độ học tiếng, lịch hẹn và những giấy tờ cần bổ sung của riêng bạn.</p>
+      <form class="account-form" data-account="student">
+        <label>Mã tra cứu / Email / Số điện thoại
+          <input name="lookup" placeholder="DCC-2026-xxxxx" />
+        </label>
+        <button class="btn primary full" type="submit">Tra cứu hồ sơ</button>
+      </form>
+      <ul class="login-perks">
+        <li>Theo dõi trạng thái hồ sơ theo thời gian thực</li>
+        <li>Biết rõ còn thiếu giấy tờ gì, deadline khi nào</li>
+        <li>Xem lịch hẹn và tiến độ học tiếng</li>
+      </ul>
+      <div class="login-foot">Chưa có hồ sơ tại DCC? <a class="text-link" href="#/dang-ky">Đăng ký thành viên →</a></div>
+    </article>
+    <article class="login-card partner-card">
+      <span class="login-badge">Đối tác DCC</span>
+      <h2>Đối tác</h2>
+      <p>DCC trân trọng mỗi đối tác như một người đồng hành. Đăng nhập để quản lý học viên bạn giới thiệu và theo dõi hoa hồng minh bạch.</p>
+      <form class="account-form" data-account="partner">
+        <label>Mã đối tác / Email
+          <input name="partner_login" placeholder="Mã đối tác hoặc email" />
+        </label>
+        <button class="btn primary full" type="submit">Vào cổng đối tác</button>
+      </form>
+      <ul class="login-perks">
+        <li>Theo dõi học viên đã gửi theo thời gian thực</li>
+        <li>Hoa hồng minh bạch, đối soát rõ ràng</li>
+        <li>Dữ liệu riêng tư — chỉ bạn xem được phần của mình</li>
+      </ul>
+      <div class="login-foot">Chưa là đối tác? <a class="text-link" href="#/partner">Đăng ký hợp tác →</a></div>
+    </article>
+  </div></section>`;
 }
 
 function renderPartnerPortal() {
-  return `<section class="page-hero"><div class="container"><p class="eyebrow">Cổng đối tác</p><h1>Gửi học viên và theo dõi hồ sơ của bạn</h1><p>Mỗi đối tác chỉ xem được học viên do chính mình giới thiệu — dữ liệu của các đối tác khác được tách riêng tuyệt đối.</p></div></section><section class="section"><div class="container portal-layout"><aside class="portal-card"><h2>Thống kê đối tác</h2>${['Tổng học viên đã gửi: 24', 'Đang tư vấn: 7', 'Đang học tiếng: 8', 'Đã có hợp đồng: 3', 'Đang visa: 4', 'Đã bay: 2'].map((item) => `<p>${item}</p>`).join('')}</aside><div>${renderPartnerForm()}<div class="table-card"><h2>Danh sách học viên mẫu</h2><table><thead><tr><th>Học viên</th><th>Chương trình</th><th>Trạng thái</th><th>Thiếu hồ sơ</th></tr></thead><tbody><tr><td>Nguyễn Văn A</td><td>Du học nghề</td><td>Đang học tiếng</td><td>Hộ chiếu</td></tr><tr><td>Trần Thị B</td><td>Au-pair</td><td>Chờ phỏng vấn</td><td>Không</td></tr></tbody></table></div></div></div></section>`;
+  const benefits = [
+    ['🤝', 'Quan hệ bền vững', 'DCC xem mỗi đối tác là người đồng hành lâu dài, không phải một giao dịch ngắn hạn.'],
+    ['💎', 'Hoa hồng minh bạch', 'Mức hoa hồng rõ ràng, đối soát công khai và thanh toán đúng hạn cho từng học viên thành công.'],
+    ['📊', 'Theo dõi realtime', 'Cổng riêng giúp bạn nắm trạng thái từng học viên đã gửi, không phải hỏi đi hỏi lại.'],
+    ['🔒', 'Dữ liệu riêng tư', 'Bạn chỉ xem được học viên của mình; dữ liệu các đối tác khác được tách biệt tuyệt đối.'],
+    ['🎓', 'Hỗ trợ chuyên môn', 'Tài liệu, đào tạo và đội ngũ tư vấn của DCC luôn sẵn sàng đồng hành cùng đối tác.'],
+    ['⏱️', 'Phản hồi tận tâm', 'Đội ngũ phụ trách đối tác riêng, phản hồi nhanh và hỗ trợ bạn đến cùng.']
+  ];
+  return `<section class="page-hero"><div class="container"><p class="eyebrow">Đối tác</p><h1>Đồng hành cùng DCC — chúng tôi trân trọng từng đối tác</h1><p>Với DCC, thành công của đối tác chính là thành công của chúng tôi. Mỗi học viên bạn gửi gắm đều được chăm sóc minh bạch, có trách nhiệm và theo dõi đến khi sang Đức an toàn.</p><div class="hero-actions"><a class="btn primary" data-scroll="partner-register">Đăng ký hợp tác</a><a class="btn ghost" href="#/hoc-vien">Đăng nhập đối tác</a></div></div></section>
+  <section class="section"><div class="container">
+    ${sectionHeader('Vì sao hợp tác với DCC', 'Mối quan hệ xây trên sự minh bạch và tôn trọng', 'Chúng tôi không xem đối tác là một kênh giao dịch — mà là người đồng hành cùng đưa học viên Việt sang Đức.')}
+    <div class="why-grid">${benefits.map(([icon, title, text]) => `<article><span>${icon}</span><h3>${title}</h3><p>${text}</p></article>`).join('')}</div>
+  </div></section>
+  <section class="section register-section" id="partner-register"><div class="container">
+    ${sectionHeader('Đăng ký hợp tác', 'Trở thành đối tác của DCC', 'Để lại thông tin, đội ngũ phụ trách đối tác sẽ liên hệ trao đổi chính sách hoa hồng và cách phối hợp cụ thể.')}
+    ${renderPartnerRegForm()}
+  </div></section>
+  <section class="section"><div class="container">
+    ${sectionHeader('Đã là đối tác?', 'Cổng quản lý dành cho đối tác', 'Sau khi đăng nhập, bạn theo dõi học viên đã gửi, trạng thái hồ sơ và phần dữ liệu thuộc quyền của mình.')}
+    <div class="portal-layout"><aside class="portal-card"><h2>Thống kê đối tác</h2>${['Tổng học viên đã gửi: 24', 'Đang tư vấn: 7', 'Đang học tiếng: 8', 'Đã có hợp đồng: 3', 'Đang visa: 4', 'Đã bay: 2'].map((item) => `<p>${item}</p>`).join('')}</aside><div>${renderPartnerForm()}<div class="table-card"><h2>Danh sách học viên mẫu</h2><table><thead><tr><th>Học viên</th><th>Chương trình</th><th>Trạng thái</th><th>Thiếu hồ sơ</th></tr></thead><tbody><tr><td>Nguyễn Văn A</td><td>Du học nghề</td><td>Đang học tiếng</td><td>Hộ chiếu</td></tr><tr><td>Trần Thị B</td><td>Au-pair</td><td>Chờ phỏng vấn</td><td>Không</td></tr></tbody></table></div></div></div>
+  </div></section>`;
+}
+
+function renderPartnerRegForm() {
+  return `<form id="partnerRegForm" class="lead-form wish-form">
+    <div class="wish-grid">
+      <label>Họ tên người đại diện<input name="full_name" required placeholder="Nguyễn Văn A" /></label>
+      <label>Đơn vị / công ty (nếu có)<input name="partner_company" placeholder="Tên trung tâm / công ty" /></label>
+      <label>Số điện thoại / Zalo<input name="phone" required placeholder="09xxxxxxxx" /></label>
+      <label>Email<input name="email" type="email" placeholder="email@example.com" /></label>
+      <label>Khu vực hoạt động<input name="province" placeholder="Ví dụ: Quảng Trị" /></label>
+      <label class="wish-note">Lời nhắn tới DCC<textarea name="note" rows="2" placeholder="Đôi nét về bạn và mong muốn hợp tác…"></textarea></label>
+    </div>
+    <div class="wish-actions">
+      <button class="btn primary" type="submit">Gửi đăng ký hợp tác</button>
+      <span class="secure-inline">🔒 DCC sẽ liên hệ để trao đổi chi tiết chính sách hợp tác.</span>
+    </div>
+    <p id="partnerRegMessage" class="form-message" role="status"></p>
+  </form>`;
 }
 
 function renderPartnerForm() {
@@ -447,6 +521,42 @@ function bindInteractions() {
 
   const form = $('#leadForm');
   if (form) bindLeadForm(form);
+
+  const partnerReg = $('#partnerRegForm');
+  if (partnerReg) partnerReg.addEventListener('submit', submitPartnerReg);
+
+  $$('[data-account]').forEach((f) => f.addEventListener('submit', (event) => {
+    event.preventDefault();
+    go(f.dataset.account === 'partner' ? '/partner' : '/tra-cuu-ho-so');
+  }));
+
+  $$('[data-scroll]').forEach((el) => el.addEventListener('click', (event) => {
+    event.preventDefault();
+    const target = document.getElementById(el.dataset.scroll);
+    if (target) target.scrollIntoView({ behavior: 'smooth' });
+  }));
+}
+
+async function submitPartnerReg(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const msg = $('#partnerRegMessage');
+  const setMsg = (text, type = '') => { if (msg) { msg.textContent = text; msg.className = `form-message ${type}`; } };
+  const payload = Object.fromEntries(new FormData(form).entries());
+  if (!payload.full_name || !payload.phone) { setMsg('Vui lòng điền tên người đại diện và số điện thoại để DCC liên hệ lại.', 'error'); return; }
+  payload.source = 'Đăng ký đối tác';
+  payload.status = 'Khách mới đăng ký';
+  payload.lookup_code = `DCC-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  try {
+    setMsg('Đang gửi đăng ký...', '');
+    const result = await submitLeadToNotion(payload);
+    if (result && result.lookup_code) payload.lookup_code = result.lookup_code;
+    form.reset();
+    setMsg(`Cảm ơn anh/chị đã muốn đồng hành cùng DCC! Đội ngũ đối tác sẽ liên hệ sớm. Mã tra cứu: ${payload.lookup_code}`, 'success');
+  } catch (error) {
+    console.error(error);
+    setMsg('Hiện chưa gửi được. Anh/chị vui lòng thử lại, hoặc liên hệ hotline/Zalo 076 778 7879.', 'error');
+  }
 }
 
 function bindWishForm(form) {

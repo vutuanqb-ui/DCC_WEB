@@ -69,6 +69,7 @@ module.exports = async (req, res) => {
     ['Muốn đi khi nào', payload.desired_departure],
     ['Ngành mong muốn', payload.desired_career],
     ['Nơi mong muốn', payload.desired_location],
+    ['Đơn vị/công ty (đối tác)', payload.partner_company],
     ['KMK/ZAB', payload.kmk_zab],
     ['KMK/ZAB - đã làm bao lâu', payload.kmk_zab_time],
     ['NARIC', payload.naric],
