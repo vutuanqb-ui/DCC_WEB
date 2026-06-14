@@ -704,8 +704,40 @@ body.nav-open .menu-toggle-text { color: #e9d9b4; }
 /* ============================================================
    TRANG CHỦ — Brand Experience (3D, điện ảnh)
    ============================================================ */
-.reveal { opacity: 0; transform: translateY(36px); transition: opacity .85s var(--ease), transform .85s var(--ease); transition-delay: var(--d, 0ms); }
-.reveal.in { opacity: 1; transform: none; }
+/* ============================================================
+   Chuyển cảnh khi cuộn — phong cách điện ảnh, cao cấp
+   Easing easeOutExpo/expo-smooth; lộ khối theo kiểu màn nhung + so le.
+   ============================================================ */
+:root { --exp: cubic-bezier(.19, 1, .22, 1); --smooth: cubic-bezier(.16, 1, .3, 1); }
+
+.fx { will-change: opacity, transform, filter, clip-path; }
+/* Trượt lên + mờ→nét (mặc định cho nội dung) */
+.fx-up { opacity: 0; transform: translateY(48px); filter: blur(7px);
+  transition: opacity .9s var(--smooth), transform 1.05s var(--exp), filter .85s ease; }
+/* Khối lớn: trượt mạnh + thu nhẹ */
+.fx-rise { opacity: 0; transform: translateY(72px) scale(.965); filter: blur(8px);
+  transition: opacity 1s var(--smooth), transform 1.15s var(--exp), filter .9s ease; }
+/* Màn nhung kéo lên — cho tiêu đề lớn */
+.fx-mask { opacity: 0; transform: translateY(34px); clip-path: inset(0 0 105% 0);
+  transition: opacity .7s var(--smooth), transform 1.1s var(--exp), clip-path 1.15s var(--exp); }
+/* Phóng nhẹ — cho thẻ/hình */
+.fx-zoom { opacity: 0; transform: scale(1.07); filter: blur(6px);
+  transition: opacity .9s var(--smooth), transform 1.1s var(--exp), filter .8s ease; }
+/* Trượt ngang */
+.fx-left { opacity: 0; transform: translateX(-54px); filter: blur(6px);
+  transition: opacity .9s var(--smooth), transform 1.05s var(--exp), filter .8s ease; }
+.fx-right { opacity: 0; transform: translateX(54px); filter: blur(6px);
+  transition: opacity .9s var(--smooth), transform 1.05s var(--exp), filter .8s ease; }
+
+.fx.is-in { opacity: 1; transform: none; filter: none; clip-path: inset(0 0 0 0); }
+
+/* Parallax chiều sâu theo cuộn (trình duyệt hỗ trợ scroll-timeline) */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .fx-parallax { animation: fxPar linear both !important; animation-timeline: view(); animation-range: entry 0% exit 100%; }
+    @keyframes fxPar { from { transform: translateY(var(--par-from, -7%)); } to { transform: translateY(var(--par-to, 7%)); } }
+  }
+}
 
 /* ---- Hero ---- */
 .bx-hero {
@@ -838,7 +870,7 @@ body.nav-open .menu-toggle-text { color: #e9d9b4; }
 .bx-bridge-arc { position: relative; width: min(600px, 100%); margin: clamp(38px, 6vh, 60px) auto 0; }
 .bx-bridge-arc svg { width: 100%; height: auto; display: block; overflow: visible; }
 .bx-arc-path { fill: none; stroke: rgba(216,177,94,.85); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 940; stroke-dashoffset: 940; filter: drop-shadow(0 0 5px rgba(216,177,94,.5)); }
-.bx-bridge.in .bx-arc-path { animation: bxDraw 2.2s var(--ease) .2s forwards; }
+.bx-bridge.is-in .bx-arc-path { animation: bxDraw 2.2s var(--ease) .2s forwards; }
 @keyframes bxDraw { to { stroke-dashoffset: 0; } }
 .bx-arc-node { fill: var(--gold-bright); filter: drop-shadow(0 0 7px rgba(216,177,94,.9)); }
 .bx-arc-dot { fill: #fff8ec; filter: drop-shadow(0 0 9px rgba(255,236,180,.95)); }
@@ -874,6 +906,6 @@ body.nav-open .menu-toggle-text { color: #e9d9b4; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
-  .bx-hero-copy > *, .bx-stage, .reveal { opacity: 1 !important; transform: none !important; }
+  .bx-hero-copy > *, .bx-stage, .fx { opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important; }
   .bx-arc-path { stroke-dashoffset: 0 !important; }
 }

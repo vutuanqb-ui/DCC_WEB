@@ -245,7 +245,7 @@ function renderHome() {
       <a class="bx-scroll-cue" href="#bx-manifesto"><span>Cuộn để khám phá</span><i></i></a>
     </section>
 
-    <section class="bx-manifesto reveal" id="bx-manifesto">
+    <section class="bx-manifesto" id="bx-manifesto">
       <div class="container">
         <div class="bx-section-head">
           <p class="bx-kicker">Kim chỉ nam</p>
@@ -254,7 +254,7 @@ function renderHome() {
         </div>
         <div class="bx-principles">
           ${BX_PRINCIPLES.map(([icon, title, text], i) => `
-            <article class="bx-principle reveal" style="--d:${i * 90}ms">
+            <article class="bx-principle">
               <div class="bx-principle-inner">
                 <span class="bx-principle-icon">${icon}</span>
                 <span class="bx-principle-no">0${i + 1}</span>
@@ -266,7 +266,7 @@ function renderHome() {
       </div>
     </section>
 
-    <section class="bx-bridge reveal">
+    <section class="bx-bridge">
       <div class="bx-aurora bx-aurora-soft" aria-hidden="true"></div>
       <div class="container bx-bridge-inner">
         <p class="bx-kicker bx-kicker-light">Cầu nối Việt Nam – Đức</p>
@@ -294,7 +294,7 @@ function renderHome() {
       </div>
     </section>
 
-    <section class="bx-cta reveal">
+    <section class="bx-cta">
       <div class="container bx-cta-inner">
         <p class="bx-kicker">Sẵn sàng?</p>
         <h2 data-i18n-html="home-cta">Hành trình sang Đức của bạn <em>bắt đầu hôm nay</em>.</h2>
@@ -843,7 +843,7 @@ function bindInteractions() {
   bindHomeExperience();
 }
 
-// Hiệu ứng trang chủ: địa cầu mạng lưới 3D + thẻ kính theo chuột + lộ dần khi cuộn.
+// Địa cầu 3D (trang chủ) + chuyển cảnh điện ảnh khi cuộn (toàn site).
 function bindHomeExperience() {
   const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const stage = $('.bx-stage');
@@ -853,20 +853,75 @@ function bindHomeExperience() {
   if (window.__bxGlobe) { window.__bxGlobe.destroy(); window.__bxGlobe = null; }
   if (canvas) window.__bxGlobe = startGlobe(canvas, stage, reduce);
 
-  // Lộ dần các phân cảnh khi cuộn tới.
-  const reveals = $$('.reveal');
-  if (reveals.length) {
-    if (reduce || !('IntersectionObserver' in window)) {
-      reveals.forEach((el) => el.classList.add('in'));
-    } else {
-      const io = new IntersectionObserver((entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) { entry.target.classList.add('in'); io.unobserve(entry.target); }
-        });
-      }, { threshold: 0.16, rootMargin: '0px 0px -8% 0px' });
-      reveals.forEach((el) => io.observe(el));
+  bindScrollScenes(reduce);
+}
+
+// Gắn chuyển cảnh cao cấp: lộ khối theo biến thể + so le, trigger keyframe, parallax.
+// Dùng rAF + getBoundingClientRect (tin cậy mọi trình duyệt) thay cho IntersectionObserver.
+function bindScrollScenes(reduce) {
+  if (window.__fxCleanup) { window.__fxCleanup(); window.__fxCleanup = null; }
+
+  const seen = new Set();
+  const pending = [];   // phần tử .fx chờ lộ ra
+  const triggers = [];  // band chỉ cần bật keyframe (không ẩn)
+
+  const add = (el, variant, delay) => {
+    if (!el || seen.has(el)) return;
+    seen.add(el);
+    if (variant) el.classList.add('fx', 'fx-' + variant);
+    if (delay) el.style.transitionDelay = delay + 'ms';
+    if (reduce) { el.classList.add('is-in'); return; }
+    pending.push(el);
+  };
+  const group = (containerSel, variant) => {
+    $$(containerSel).forEach((g) => {
+      Array.from(g.children).forEach((c, i) => add(c, variant, Math.min(i, 7) * 90));
+    });
+  };
+
+  // Tiêu đề lớn — màn nhung kéo lên.
+  ['.page-hero h1', '.section-head h2', '.bx-section-head h2', '.bx-cta h2', '.bx-bridge-title'].forEach((s) => $$(s).forEach((el) => add(el, 'mask')));
+  // Văn bản quanh tiêu đề.
+  ['.page-hero .eyebrow', '.page-hero p', '.section-head .eyebrow', '.section-head .section-copy', '.bx-section-head .bx-kicker', '.bx-section-head .bx-section-lead', '.bx-cta .bx-kicker', '.bx-cta .bx-cta-lead', '.bx-cta .bx-actions', '.bx-bridge .bx-kicker'].forEach((s) => $$(s).forEach((el) => add(el, 'up')));
+  // Cung cầu + số liệu.
+  $$('.bx-bridge-arc').forEach((el) => add(el, 'zoom'));
+  group('.bx-bridge-stats', 'up');
+  // Lưới thẻ — phóng nhẹ so le.
+  ['.bx-principles', '.program-grid', '.why-grid', '.module-grid', '.orders-list', '.gallery-grid', '.track-grid'].forEach((s) => group(s, 'zoom'));
+  // Hàng/khối — trượt lên so le.
+  ['.timeline', '.risk-list', '.filters', '.portal-grid'].forEach((s) => group(s, 'up'));
+  // Khối đơn lẻ ở các trang.
+  ['.wish-form', '.lead-form', '.register-grid', '.detail-grid', '.login-card', '.lookup-card', '.profile-card', '.aw-card', '.partner-portal .compact-form'].forEach((s) => $$(s).forEach((el) => add(el, 'up')));
+
+  // Band cung cầu — chỉ bật keyframe vẽ cung, không ẩn nội dung.
+  $$('.bx-bridge').forEach((el) => { if (reduce) el.classList.add('is-in'); else triggers.push(el); });
+  // Parallax chiều sâu cho lớp nền trang trí (trình duyệt hỗ trợ scroll-timeline).
+  if (!reduce) $$('.bx-bridge .bx-aurora-soft').forEach((el) => el.classList.add('fx-parallax'));
+
+  if (reduce || (!pending.length && !triggers.length)) return;
+
+  let raf = 0;
+  const check = () => {
+    raf = 0;
+    const vh = window.innerHeight;
+    for (let i = pending.length - 1; i >= 0; i--) {
+      const t = pending[i].getBoundingClientRect().top;
+      if (t < vh * 0.9) { pending[i].classList.add('is-in'); pending.splice(i, 1); }
     }
-  }
+    for (let i = triggers.length - 1; i >= 0; i--) {
+      const r = triggers[i].getBoundingClientRect();
+      if (r.top < vh * 0.92 && r.bottom > 0) { triggers[i].classList.add('is-in'); triggers.splice(i, 1); }
+    }
+  };
+  const onScroll = () => { if (!raf) raf = requestAnimationFrame(check); };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+  check(); requestAnimationFrame(check);  // lộ ngay phần đầu trang
+  window.__fxCleanup = () => {
+    window.removeEventListener('scroll', onScroll);
+    window.removeEventListener('resize', onScroll);
+    if (raf) cancelAnimationFrame(raf);
+  };
 }
 
 // Vẽ địa cầu holographic: bản đồ thế giới thật (biên giới + tên nước) xoay 3D,
