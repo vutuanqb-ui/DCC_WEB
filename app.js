@@ -308,29 +308,49 @@ function renderRisksSection(short = false) {
   </div></section>`;
 }
 
+// Để hiện ẢNH THẬT: điền đường dẫn ảnh vào trường `img` (URL hoặc đường dẫn tương đối, ví dụ './images/lop-hoc.jpg').
+// Ô nào chưa có `img` sẽ tự hiển thị nền màu minh họa.
+const GALLERY = [
+  { label: 'Lớp học tiếng Đức', img: '' },
+  { label: 'Học viên', img: '' },
+  { label: 'Buổi tư vấn', img: '' },
+  { label: 'Hoạt động trung tâm', img: '' },
+  { label: 'Đối tác/đơn hàng', img: '' },
+  { label: 'Nước Đức truyền cảm hứng', img: '' }
+];
+
 function renderGallerySection() {
-  const items = ['Lớp học tiếng Đức', 'Học viên', 'Buổi tư vấn', 'Hoạt động trung tâm', 'Đối tác/đơn hàng', 'Nước Đức truyền cảm hứng'];
-  return `<section class="section gallery-section"><div class="container">${sectionHeader('Hình ảnh trung tâm', 'Không gian học tập, tư vấn và kết nối Đức - Việt.', 'Gallery hiện dùng khung minh họa; admin có thể upload ảnh thật từ app nội bộ hoặc Supabase Storage trong giai đoạn tích hợp tiếp theo.')}
-    <div class="gallery-grid">${items.map((item, index) => `<figure class="gallery-item tone-${index + 1}"><span>${item}</span></figure>`).join('')}</div>
+  return `<section class="section gallery-section"><div class="container">${sectionHeader('Hình ảnh trung tâm', 'Không gian học tập, tư vấn và kết nối Đức - Việt.', 'Những khoảnh khắc học tập, tư vấn và hành trình sang Đức cùng Deutsch Connect Center.')}
+    <div class="gallery-grid">${GALLERY.map((item, index) => `<figure class="gallery-item tone-${index + 1}"${item.img ? ` style="background-image:url('${item.img}');background-size:cover;background-position:center;"` : ''}><span>${item.label}</span></figure>`).join('')}</div>
   </div></section>`;
 }
 
 function renderWhySection() {
-  const reasons = ['Lộ trình rõ ràng', 'Hồ sơ minh bạch', 'Theo dõi tiến độ online', 'Tư vấn đúng diện', 'Đồng hành học tiếng', 'Không bỏ sót khách hàng', 'Có hệ thống quản lý nội bộ', 'Cảnh báo rủi ro trước khi tham gia', 'Kết nối đối tác Đức'];
+  const reasons = [
+    ['Lộ trình rõ ràng', 'Mỗi học viên có lộ trình riêng theo điều kiện thực tế: học tiếng, hồ sơ, phỏng vấn, visa và thời gian dự kiến.'],
+    ['Hồ sơ minh bạch', 'Bạn luôn biết hồ sơ đang ở bước nào, còn thiếu giấy tờ gì và ai đang phụ trách.'],
+    ['Theo dõi tiến độ online', 'Tra cứu trạng thái hồ sơ, deadline và lịch hẹn mọi lúc, không phải hỏi đi hỏi lại.'],
+    ['Tư vấn đúng diện', 'DCC đánh giá năng lực, bằng cấp và mục tiêu để tư vấn đúng chương trình, không ép chọn sai diện.'],
+    ['Đồng hành học tiếng', 'Lớp A1–B2 có kiểm tra đầu vào, lộ trình rõ ràng và nhắc lịch thi chứng chỉ đúng hạn.'],
+    ['Không bỏ sót khách hàng', 'Hệ thống nhắc việc và phân công giúp không bỏ quên bất kỳ học viên hay deadline nào.'],
+    ['Có hệ thống quản lý nội bộ', 'Toàn bộ hồ sơ, lịch hẹn và công việc được quản lý tập trung, hạn chế sai sót thủ công.'],
+    ['Cảnh báo rủi ro từ đầu', 'DCC nói rõ rủi ro và chi phí ngay từ đầu để bạn chuẩn bị đúng, không vỡ kế hoạch.'],
+    ['Kết nối đối tác Đức', 'DCC làm việc trực tiếp với đối tác tại Đức để cập nhật đơn hàng và cơ hội thực tế.']
+  ];
   return `<section class="section why-section"><div class="container">${sectionHeader('Vì sao chọn Deutsch Connect Center?', 'Uy tín đến từ hệ thống, quy trình và cách nói thật với học viên.', 'DCC tập trung vào dữ liệu rõ ràng, phân công trách nhiệm và tiến độ hồ sơ có thể theo dõi.')}
-    <div class="why-grid">${reasons.map((item) => `<article><span>✓</span><h3>${item}</h3><p>Quy trình được thiết kế để học viên, phụ huynh và đối tác hiểu việc gì đang diễn ra, ai phụ trách và bước tiếp theo là gì.</p></article>`).join('')}</div>
+    <div class="why-grid">${reasons.map(([title, text]) => `<article><span>✓</span><h3>${title}</h3><p>${text}</p></article>`).join('')}</div>
   </div></section>`;
 }
 
 function renderRegisterSection() {
-  return `<section class="section register-section" id="register"><div class="container register-grid"><div><p class="eyebrow">Đăng ký tư vấn</p><h2>Điền từng bước, không quá dài trên một màn hình.</h2><p class="muted">Sau khi gửi, hệ thống lưu lead vào Supabase với trạng thái “Khách mới đăng ký”, nguồn “Website” và chương trình quan tâm.</p><div class="secure-note">🔐 Frontend chỉ dùng anon public key. Service role key phải giữ ở server/Supabase Edge Function.</div></div>${renderLeadForm()}</div></section>`;
+  return `<section class="section register-section" id="register"><div class="container register-grid"><div><p class="eyebrow">Đăng ký tư vấn</p><h2>Điền từng bước, không quá dài trên một màn hình.</h2><p class="muted">Form chia thành các bước ngắn, dễ điền ngay trên điện thoại. Sau khi nhận thông tin, DCC sẽ liên hệ lại để tư vấn miễn phí và đúng diện cho bạn.</p><div class="secure-note">🔒 Thông tin của bạn được bảo mật và chỉ dùng để tư vấn lộ trình phù hợp.</div></div>${renderLeadForm()}</div></section>`;
 }
 
 function renderLeadForm() {
   return `<form id="leadForm" class="lead-form">
     <div class="form-progress"><span class="active">1</span><span>2</span><span>3</span><span>4</span></div>
     <fieldset data-step="1" class="active"><legend>Bước 1: Thông tin cá nhân</legend><label>Họ tên<input name="full_name" required placeholder="Nguyễn Văn A" /></label><label>Ngày sinh<input name="birth_date" type="date" /></label><label>Số điện thoại<input name="phone" required placeholder="09xxxxxxxx" /></label><label>Email<input name="email" type="email" placeholder="email@example.com" /></label><label>Tỉnh/thành phố<input name="province" placeholder="Ví dụ: Hà Nội" /></label><label>Zalo/Facebook<input name="social_contact" placeholder="Link hoặc số Zalo" /></label></fieldset>
-    <fieldset data-step="2"><legend>Bước 2: Chọn chương trình quan tâm</legend><label>Chương trình<select name="program_interest" required><option value="">Chọn chương trình</option><option>Du học nghề Đức</option><option>Chuyển đổi văn bằng 18B</option><option>18A</option><option>Au-pair Đức</option><option>Thời vụ 8 tháng</option><option>Học tiếng Đức</option><option>Chưa biết, cần tư vấn</option></select></label></fieldset>
+    <fieldset data-step="2"><legend>Bước 2: Chọn chương trình quan tâm</legend><label>Chương trình<select name="program_interest" required><option value="">Chọn chương trình</option><option>Du học nghề Đức</option><option>Chuyển đổi văn bằng 18B</option><option>18A</option><option>Au-pair Đức</option><option>Thời vụ 8 tháng</option><option>Học tiếng Đức</option><option>Chưa biết – cần tư vấn</option></select></label></fieldset>
     <fieldset data-step="3"><legend>Bước 3: Trình độ hiện tại</legend><label>Trình độ tiếng Đức<select name="german_level"><option>Chưa học</option><option>A1</option><option>A2</option><option>B1</option><option>B2</option></select></label><label>Bằng cấp cao nhất<input name="highest_education" placeholder="THPT / Trung cấp / Cao đẳng / Đại học" /></label><label>Ngành học/nghề hiện tại<input name="current_career" /></label><label>Kinh nghiệm làm việc<textarea name="work_experience" rows="3"></textarea></label><label>Tình trạng hộ chiếu<select name="passport_status"><option>Chưa có</option><option>Đang làm</option><option>Đã có</option></select></label><label>Tình trạng hồ sơ<input name="document_status" placeholder="Đã có bằng, thiếu hộ chiếu..." /></label></fieldset>
     <fieldset data-step="4"><legend>Bước 4: Mục tiêu và thời gian mong muốn</legend><label>Muốn đi Đức khi nào<input name="desired_departure" placeholder="Ví dụ: 2026 hoặc sau khi có B1" /></label><label>Ngành mong muốn<input name="desired_career" /></label><label>Thành phố/bang mong muốn<input name="desired_location" /></label><label>Ghi chú thêm<textarea name="note" rows="4" placeholder="Điều anh/chị muốn DCC tư vấn kỹ hơn"></textarea></label></fieldset>
     <div class="form-actions"><button class="btn secondary" type="button" data-prev disabled>Quay lại</button><button class="btn primary" type="button" data-next>Tiếp tục</button><button class="btn primary hidden" type="submit">Gửi thông tin</button></div><p id="formMessage" class="form-message" role="status"></p>
@@ -354,22 +374,22 @@ function renderOrderDetail(id) {
 }
 
 function renderStudentPortal() {
-  return `<section class="page-hero"><div class="container"><p class="eyebrow">Cổng học viên</p><h1>Dashboard cá nhân chỉ xem hồ sơ của chính mình</h1><p>Đăng nhập bằng email/số điện thoại ở giai đoạn tích hợp Supabase Auth. RLS bắt buộc lọc theo user_id.</p></div></section><section class="section"><div class="container portal-layout"><aside class="portal-card"><h2>Thông tin cá nhân</h2><p><b>Chương trình:</b> Du học nghề Đức</p><p><b>Trạng thái hiện tại:</b> Đang hoàn thiện hồ sơ</p><p><b>Deadline gần nhất:</b> Bổ sung hộ chiếu</p></aside><div><div class="stage-timeline">${PORTAL_STAGES.map((stage, idx) => `<span class="${idx <= 3 ? 'done' : ''}">${stage}</span>`).join('')}</div><div class="portal-grid">${['Checklist giấy tờ', 'Trạng thái học tiếng', 'Phỏng vấn', 'Hợp đồng', 'Visa', 'Lịch hẹn', 'Ghi chú được phép hiển thị', 'File cần bổ sung'].map((item) => `<article><h3>${item}</h3><p>Dữ liệu sẽ lấy từ Supabase theo quyền student/customer.</p></article>`).join('')}</div></div></div></section>`;
+  return `<section class="page-hero"><div class="container"><p class="eyebrow">Cổng học viên</p><h1>Dashboard cá nhân — chỉ bạn xem được hồ sơ của mình</h1><p>Đăng nhập bằng email hoặc số điện thoại đã đăng ký để xem hồ sơ, tiến độ học tiếng và lịch hẹn của riêng bạn.</p></div></section><section class="section"><div class="container portal-layout"><aside class="portal-card"><h2>Thông tin cá nhân</h2><p><b>Chương trình:</b> Du học nghề Đức</p><p><b>Trạng thái hiện tại:</b> Đang hoàn thiện hồ sơ</p><p><b>Deadline gần nhất:</b> Bổ sung hộ chiếu</p></aside><div><div class="stage-timeline">${PORTAL_STAGES.map((stage, idx) => `<span class="${idx <= 3 ? 'done' : ''}">${stage}</span>`).join('')}</div><div class="portal-grid">${['Checklist giấy tờ', 'Trạng thái học tiếng', 'Phỏng vấn', 'Hợp đồng', 'Visa', 'Lịch hẹn', 'Ghi chú được phép hiển thị', 'File cần bổ sung'].map((item) => `<article><h3>${item}</h3><p>Thông tin chi tiết sẽ hiển thị khi bạn đăng nhập tài khoản học viên.</p></article>`).join('')}</div></div></div></section>`;
 }
 
 function renderPartnerPortal() {
-  return `<section class="page-hero"><div class="container"><p class="eyebrow">Cổng đối tác</p><h1>Đối tác gửi học viên và theo dõi học viên thuộc chính mình</h1><p>Partner chỉ xem dữ liệu có partner_id của mình. Không xem được học viên của đối tác khác.</p></div></section><section class="section"><div class="container portal-layout"><aside class="portal-card"><h2>Thống kê đối tác</h2>${['Tổng học viên đã gửi: 24', 'Đang tư vấn: 7', 'Đang học tiếng: 8', 'Đã có hợp đồng: 3', 'Đang visa: 4', 'Đã bay: 2'].map((item) => `<p>${item}</p>`).join('')}</aside><div>${renderPartnerForm()}<div class="table-card"><h2>Danh sách học viên mẫu</h2><table><thead><tr><th>Học viên</th><th>Chương trình</th><th>Trạng thái</th><th>Thiếu hồ sơ</th></tr></thead><tbody><tr><td>Nguyễn Văn A</td><td>Du học nghề</td><td>Đang học tiếng</td><td>Hộ chiếu</td></tr><tr><td>Trần Thị B</td><td>Au-pair</td><td>Chờ phỏng vấn</td><td>Không</td></tr></tbody></table></div></div></div></section>`;
+  return `<section class="page-hero"><div class="container"><p class="eyebrow">Cổng đối tác</p><h1>Đối tác gửi học viên và theo dõi học viên của mình</h1><p>Mỗi đối tác chỉ xem được các học viên do chính mình giới thiệu, không xem được dữ liệu của đối tác khác.</p></div></section><section class="section"><div class="container portal-layout"><aside class="portal-card"><h2>Thống kê đối tác</h2>${['Tổng học viên đã gửi: 24', 'Đang tư vấn: 7', 'Đang học tiếng: 8', 'Đã có hợp đồng: 3', 'Đang visa: 4', 'Đã bay: 2'].map((item) => `<p>${item}</p>`).join('')}</aside><div>${renderPartnerForm()}<div class="table-card"><h2>Danh sách học viên mẫu</h2><table><thead><tr><th>Học viên</th><th>Chương trình</th><th>Trạng thái</th><th>Thiếu hồ sơ</th></tr></thead><tbody><tr><td>Nguyễn Văn A</td><td>Du học nghề</td><td>Đang học tiếng</td><td>Hộ chiếu</td></tr><tr><td>Trần Thị B</td><td>Au-pair</td><td>Chờ phỏng vấn</td><td>Không</td></tr></tbody></table></div></div></div></section>`;
 }
 
 function renderPartnerForm() {
-  return `<form class="lead-form compact-form"><legend>Form đối tác gửi học viên</legend><label>Tên đối tác<input name="partner_name"></label><label>Mã đối tác<input name="partner_code"></label><label>Họ tên học viên<input name="student_name"></label><label>Số điện thoại<input name="phone"></label><label>Email<input name="email"></label><label>Ngày sinh<input type="date" name="birth_date"></label><label>Chương trình quan tâm<input name="program_interest"></label><label>Trình độ tiếng Đức<input name="german_level"></label><label>Bằng cấp<input name="education"></label><label>Ghi chú<textarea rows="3"></textarea></label><label>File đính kèm<input type="file" disabled><small>Kích hoạt sau khi cấu hình Supabase Storage.</small></label><button class="btn primary" type="button">Lưu nháp trong bản demo</button></form>`;
+  return `<form class="lead-form compact-form"><legend>Form đối tác gửi học viên</legend><label>Tên đối tác<input name="partner_name"></label><label>Mã đối tác<input name="partner_code"></label><label>Họ tên học viên<input name="student_name"></label><label>Số điện thoại<input name="phone"></label><label>Email<input name="email"></label><label>Ngày sinh<input type="date" name="birth_date"></label><label>Chương trình quan tâm<input name="program_interest"></label><label>Trình độ tiếng Đức<input name="german_level"></label><label>Bằng cấp<input name="education"></label><label>Ghi chú<textarea rows="3"></textarea></label><label>File đính kèm<input type="file"><small>Đính kèm bằng cấp, CV hoặc giấy tờ liên quan nếu có.</small></label><button class="btn primary" type="button">Gửi thông tin học viên</button></form>`;
 }
 
 function renderInternalApp() {
-  return `<section class="page-hero"><div class="container"><p class="eyebrow">App nội bộ</p><h1>Operating Center cho nhân viên DCC</h1><p>Vai trò: admin, manager, staff, teacher, partner, student/customer. Dữ liệu nhạy cảm được hạn chế theo role và RLS.</p><div class="hero-actions"><a class="btn primary" href="${(window.DCC_PUBLIC_CONFIG || {}).STAFF_APP_URL || 'https://app.deutschconnectcenter.com'}">Mở subdomain app</a></div></div></section><section class="section"><div class="container"><div class="role-grid">${['admin: xem và quản lý tất cả', 'manager: xem phần được giao', 'staff: xem khách/hồ sơ assign_to', 'teacher: lớp/học viên được phân công', 'partner: học viên do mình gửi', 'student/customer: hồ sơ của chính mình'].map((role) => `<span>${role}</span>`).join('')}</div><div class="module-grid">${MODULES.map(([title, text]) => `<article><h3>${title}</h3><p>${text}</p></article>`).join('')}</div></div></section>`;
+  return `<section class="page-hero"><div class="container"><p class="eyebrow">App nội bộ</p><h1>Operating Center cho nhân viên DCC</h1><p>Phân quyền theo vai trò: admin, quản lý, nhân viên, giáo viên, đối tác và học viên — mỗi người chỉ thấy phần dữ liệu thuộc trách nhiệm của mình.</p><div class="hero-actions"><a class="btn primary" href="${(window.DCC_PUBLIC_CONFIG || {}).STAFF_APP_URL || 'https://app.deutschconnectcenter.com'}">Mở subdomain app</a></div></div></section><section class="section"><div class="container"><div class="role-grid">${['admin: xem và quản lý tất cả', 'manager: xem phần được giao', 'staff: xem khách/hồ sơ assign_to', 'teacher: lớp/học viên được phân công', 'partner: học viên do mình gửi', 'student/customer: hồ sơ của chính mình'].map((role) => `<span>${role}</span>`).join('')}</div><div class="module-grid">${MODULES.map(([title, text]) => `<article><h3>${title}</h3><p>${text}</p></article>`).join('')}</div></div></section>`;
 }
 
-function renderLookupPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Tra cứu hồ sơ</p><h1>Tra cứu trạng thái ban đầu bằng mã hoặc tài khoản</h1><p>Giai đoạn tích hợp Supabase Auth sẽ cho phép học viên đăng nhập để xem đúng hồ sơ cá nhân.</p></div></section><section class="section"><div class="container narrow"><form class="lead-form"><label>Mã tra cứu / email / số điện thoại<input placeholder="DCC-2026-xxxxx"></label><button class="btn primary" type="button">Tra cứu demo</button><p class="muted">Bản demo không hiển thị dữ liệu nhạy cảm khi chưa xác thực.</p></form></div></section>`; }
+function renderLookupPage() { return `<section class="page-hero"><div class="container"><p class="eyebrow">Tra cứu hồ sơ</p><h1>Tra cứu nhanh trạng thái hồ sơ bằng mã hoặc thông tin đã đăng ký</h1><p>Nhập mã tra cứu DCC đã cấp, hoặc email/số điện thoại bạn dùng khi đăng ký để xem nhanh tình trạng hồ sơ.</p></div></section><section class="section"><div class="container narrow"><form class="lead-form"><label>Mã tra cứu / email / số điện thoại<input placeholder="DCC-2026-xxxxx"></label><button class="btn primary" type="button">Tra cứu</button><p class="muted">Để bảo mật, một số thông tin chi tiết chỉ hiển thị sau khi bạn đăng nhập tài khoản học viên.</p></form></div></section>`; }
 function renderAboutContact(path) { return `<section class="page-hero"><div class="container"><p class="eyebrow">${path === '/gioi-thieu' ? 'Giới thiệu' : 'Liên hệ'}</p><h1>Deutsch Connect Center</h1><p>Trung tâm hỗ trợ học tiếng Đức, tuyển sinh du học nghề, chuyển đổi văn bằng 18B/18A, Au-pair, thời vụ 8 tháng, hồ sơ visa và kết nối đối tác tại Đức.</p></div></section>${renderWhySection()}${renderRegisterSection()}`; }
 
 function bindInteractions() {
@@ -417,40 +437,39 @@ function setMessage(text, type = '') {
 
 async function submitLead(event) {
   event.preventDefault();
-  const data = new FormData(event.currentTarget);
+  const form = event.currentTarget;
+  const data = new FormData(form);
   const payload = Object.fromEntries(data.entries());
   payload.source = 'Website';
   payload.status = 'Khách mới đăng ký';
-  payload.program_interest = payload.program_interest || 'Chưa biết, cần tư vấn';
+  payload.program_interest = payload.program_interest || 'Chưa biết – cần tư vấn';
   payload.lookup_code = `DCC-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
   try {
     setMessage('Đang gửi thông tin...', '');
-    await submitLeadToSupabase(payload);
-    event.currentTarget.reset();
-    setMessage(`Cảm ơn anh/chị. DCC đã nhận thông tin. Mã tra cứu tạm thời: ${payload.lookup_code}`, 'success');
+    const result = await submitLeadToNotion(payload);
+    if (result && result.lookup_code) payload.lookup_code = result.lookup_code;
+    form.reset();
+    setMessage(`Cảm ơn anh/chị. DCC đã nhận thông tin và sẽ liên hệ tư vấn sớm. Mã tra cứu của bạn: ${payload.lookup_code}`, 'success');
   } catch (error) {
     console.error(error);
-    setMessage(`Chưa gửi được: ${error.message}. Nếu chưa cấu hình Supabase, đây là cảnh báo bình thường khi chạy demo.`, 'error');
+    setMessage('Hiện chưa gửi được thông tin. Bạn vui lòng thử lại, hoặc liên hệ trực tiếp DCC qua hotline/Zalo/Facebook để được hỗ trợ nhanh.', 'error');
   }
 }
 
-async function submitLeadToSupabase(payload) {
+async function submitLeadToNotion(payload) {
   const config = window.DCC_PUBLIC_CONFIG || {};
-  if (!config.SUPABASE_URL || !config.SUPABASE_ANON_KEY || config.SUPABASE_ANON_KEY.includes('DAN_SUPABASE')) {
-    throw new Error('Chưa cấu hình Supabase anon key trong config.js');
-  }
-  const response = await fetch(`${config.SUPABASE_URL}/rest/v1/leads`, {
+  const endpoint = config.LEAD_API || '/api/lead';
+  const response = await fetch(endpoint, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      apikey: config.SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${config.SUPABASE_ANON_KEY}`,
-      Prefer: 'return=minimal'
-    },
-    body: JSON.stringify(payload)
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
   });
-  if (!response.ok) throw new Error(await response.text() || 'Không lưu được dữ liệu vào Supabase');
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data.ok) {
+    throw new Error(data.error || `Lỗi gửi lead (HTTP ${response.status})`);
+  }
+  return data;
 }
 
 $('.menu-toggle')?.addEventListener('click', (event) => {

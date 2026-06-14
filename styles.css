@@ -200,3 +200,13 @@ th { color: var(--navy); }
   .section { padding: 58px 0; }
   .card-actions .btn { width: 100%; }
 }
+
+/* Nút nổi liên hệ nhanh (Gọi / Zalo / Facebook) */
+.float-contact { position: fixed; right: 16px; bottom: 16px; z-index: 60; display: flex; flex-direction: column; gap: 10px; }
+.float-contact a { width: 52px; height: 52px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-size: 22px; box-shadow: 0 10px 24px rgba(11,31,58,.28); transition: transform .15s ease; text-decoration: none; }
+.float-contact a:hover { transform: translateY(-2px) scale(1.05); }
+.float-contact .fc-call { background: #16a34a; animation: fc-pulse 1.8s infinite; }
+.float-contact .fc-zalo { background: #0068ff; font-size: 14px; font-weight: 900; letter-spacing: .3px; }
+.float-contact .fc-fb { background: #1877f2; }
+@keyframes fc-pulse { 0% { box-shadow: 0 0 0 0 rgba(22,163,74,.45); } 70% { box-shadow: 0 0 0 14px rgba(22,163,74,0); } 100% { box-shadow: 0 0 0 0 rgba(22,163,74,0); } }
+@media (max-width: 560px) { .float-contact a { width: 48px; height: 48px; } }
