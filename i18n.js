@@ -528,13 +528,13 @@
   const HTML_I18N = {
     en: {
       'hero-main': `Your path to Germany — <em>clear</em>, <em>transparent</em> paperwork, a <em>solid</em> future.`,
-      'home-hero': `Bringing Vietnamese people to Germany — with <em>transparency</em> and <em>dedication</em>.`,
+      'home-hero': `<span class="bx-th-from">From <em>Vietnam</em> to <em>Germany</em></span><span class="bx-th-promise">Dedication for a journey done right</span>`,
       'home-bridge': `A solid bridge between two shores — where <em>dreams</em> meet <em>opportunity</em>.`,
       'home-cta': `Your journey to Germany <em>begins today</em>.`,
     },
     de: {
       'hero-main': `Dein Weg nach Deutschland — <em>klar</em>, <em>transparente</em> Unterlagen, eine <em>sichere</em> Zukunft.`,
-      'home-hero': `Wir bringen Vietnamesen nach Deutschland — mit <em>Transparenz</em> und <em>Hingabe</em>.`,
+      'home-hero': `<span class="bx-th-from">Von <em>Vietnam</em> nach <em>Deutschland</em></span><span class="bx-th-promise">Mit Hingabe für den richtigen Weg</span>`,
       'home-bridge': `Eine feste Brücke zwischen zwei Ufern — wo <em>Träume</em> auf <em>Chancen</em> treffen.`,
       'home-cta': `Ihre Reise nach Deutschland <em>beginnt heute</em>.`,
     },

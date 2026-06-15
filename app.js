@@ -226,7 +226,7 @@ function renderHome() {
       <div class="container bx-hero-grid">
         <div class="bx-hero-copy">
           <p class="bx-eyebrow">Deutsch Connect Center · Cầu nối Việt Nam – Đức</p>
-          <h1 class="bx-title" data-i18n-html="home-hero">Đưa người Việt đến nước Đức — bằng sự <em>minh bạch</em> và <em>tận tâm</em>.</h1>
+          <h1 class="bx-title bx-title-hero" data-i18n-html="home-hero"><span class="bx-th-from">Từ <em>Việt&nbsp;Nam</em> tới <em>Đức</em></span><span class="bx-th-promise">Tận tâm cho một hành trình đúng</span></h1>
           <p class="bx-lead">Không lời hứa hão. Chỉ một lộ trình rõ ràng, một hồ sơ minh bạch và một đội ngũ đồng hành đến khi bạn thật sự vững vàng trên đất Đức.</p>
           <div class="bx-actions">
             <a class="btn primary bx-btn-lg" href="#/don-hang">Bắt đầu hành trình</a>

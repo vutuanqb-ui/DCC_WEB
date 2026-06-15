@@ -808,6 +808,21 @@ body.nav-open .menu-toggle-text { color: #e9d9b4; }
 .bx-eyebrow::before { content: ""; width: 28px; height: 2px; background: linear-gradient(90deg, var(--gold-bright), transparent); }
 .bx-title { color: #fff; font-size: clamp(38px, 5.5vw, 76px); line-height: 1.04; font-weight: 680; letter-spacing: -.032em; margin: 0 0 var(--s3); }
 .bx-title em { font-style: italic; color: var(--gold-bright); font-weight: 600; }
+/* Hero headline — bố cục tỷ lệ vàng: dòng hành trình (1) · dòng cam kết (1/φ ≈ .618) */
+.bx-title-hero { display: flex; flex-direction: column; gap: .382em; }
+.bx-th-from { display: block; font-size: 1em; line-height: 1.0; }
+.bx-th-from em { white-space: nowrap; }
+.bx-th-promise {
+  display: block; position: relative;
+  font-size: .618em; line-height: 1.18; font-weight: 540;
+  letter-spacing: .004em; color: #e7dcc0;
+  padding-top: .5em; margin-top: .12em;
+}
+.bx-th-promise::before {
+  content: ""; position: absolute; top: 0; left: .04em;
+  width: 2.236em; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, var(--gold-bright), transparent);
+}
 .bx-lead { color: #c6d4e8; max-width: 42ch; font-size: clamp(16px, 1.2vw, 19px); line-height: 1.66; }
 .bx-trust { margin-top: var(--s4); color: #8aa0bf; font-size: 13px; letter-spacing: .04em; font-weight: 500; }
 .bx-actions { display: flex; gap: 14px; flex-wrap: wrap; margin: var(--s4) 0 0; }
