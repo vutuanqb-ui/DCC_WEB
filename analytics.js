@@ -106,15 +106,15 @@ window.DCC_ANALYTICS = {
 
   var TXT = {
     vi: {
-      msg: 'DCC dùng cookie để đo lượng truy cập và cải thiện trải nghiệm cho bạn. Bạn đồng ý cho chúng tôi dùng cookie phân tích & quảng cáo chứ?',
+      msg: 'DCC dùng cookie để hiểu bạn cần gì, và cải thiện trải nghiệm tốt hơn cho bạn. Bạn đồng ý chứ?',
       ok: 'Đồng ý', no: 'Từ chối'
     },
     en: {
-      msg: 'DCC uses cookies to measure traffic and improve your experience. Do you agree to let us use analytics & advertising cookies?',
+      msg: 'DCC uses cookies to understand what you need and improve your experience. Do you agree?',
       ok: 'Accept', no: 'Decline'
     },
     de: {
-      msg: 'DCC verwendet Cookies, um Besuche zu messen und Ihr Erlebnis zu verbessern. Stimmen Sie Analyse- und Werbe-Cookies zu?',
+      msg: 'DCC verwendet Cookies, um zu verstehen, was Sie brauchen, und Ihr Erlebnis zu verbessern. Stimmen Sie zu?',
       ok: 'Zustimmen', no: 'Ablehnen'
     }
   };
