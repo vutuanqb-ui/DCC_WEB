@@ -10,6 +10,9 @@
 
 const NOTION_API = 'https://api.notion.com/v1/pages';
 const NOTION_VERSION = '2022-06-28';
+// DB chia sẻ cho ĐỐI TÁC TẠI ĐỨC (email/SĐT đã che). Bản nội bộ đầy đủ vẫn ở DB Lead.
+const DEFAULT_STUDENT_SHARED_DB_ID = 'f43d0200bbaf48fdb48cb2b3910eaab7';
+const SHARED_LEVELS = ['Chưa học', 'A1', 'A2', 'B1', 'B2'];
 
 // Các lựa chọn hợp lệ của ô SELECT trong Notion (Notion báo lỗi nếu có dấu phẩy).
 const PROGRAMS = ['Du học nghề Đức', 'Chuyển đổi văn bằng 18B', '18A', 'Au-pair Đức', 'Thời vụ 8 tháng', 'Học tiếng Đức', 'Chưa biết – cần tư vấn'];
@@ -28,6 +31,57 @@ function selectValue(value) {
 function richText(value) {
   const v = clean(value);
   return v ? [{ text: { content: v.slice(0, 2000) } }] : [];
+}
+
+// Che bớt SĐT: giữ 2 số đầu + 2 số cuối, vd 0912345678 → 09••••78.
+function maskPhone(value) {
+  const digits = clean(value).replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.length <= 4) return (digits[0] || '') + '•••';
+  return `${digits.slice(0, 2)}••••${digits.slice(-2)}`;
+}
+
+// Che bớt email: giữ 2 ký tự đầu + tên miền, vd nguyen@gmail.com → ng•••@gmail.com.
+function maskEmail(value) {
+  const e = clean(value);
+  if (!e) return '';
+  const at = e.indexOf('@');
+  if (at < 1) return (e[0] || '') + '•••';
+  return `${e.slice(0, at).slice(0, 2)}•••@${e.slice(at + 1)}`;
+}
+
+// Ghi bản che cho DB học viên chia sẻ đối tác Đức (phụ — lỗi chỉ log, không chặn lead chính).
+async function writeStudentShared(token, payload, fullName, lookupCode) {
+  const dbId = process.env.NOTION_STUDENT_SHARED_DB_ID || DEFAULT_STUDENT_SHARED_DB_ID;
+  const sharedNote = [
+    ['Ngành mong muốn', payload.desired_career],
+    ['Nơi mong muốn', payload.desired_location],
+    ['Ghi chú', payload.note],
+  ].filter(([, v]) => clean(v)).map(([k, v]) => `${k}: ${clean(v)}`).join('\n');
+
+  const props = {
+    'Họ và tên': { title: [{ text: { content: fullName.slice(0, 200) } }] },
+    'Email': { rich_text: richText(maskEmail(payload.email)) },
+    'Số điện thoại': { rich_text: richText(maskPhone(payload.phone)) },
+    'Chương trình': { rich_text: richText(clean(payload.program_interest).replace(/,/g, ' –')) },
+    'Tỉnh / thành': { rich_text: richText(payload.province) },
+    'Ghi chú': { rich_text: richText(sharedNote) },
+    'Mã tra cứu': { rich_text: richText(lookupCode) },
+    'Trạng thái': { select: { name: 'Mới' } },
+  };
+  const lv = clean(payload.german_level);
+  if (SHARED_LEVELS.includes(lv)) props['Trình độ tiếng Đức'] = { select: { name: lv } };
+
+  try {
+    const r = await fetch(NOTION_API, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Notion-Version': NOTION_VERSION, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ parent: { database_id: dbId }, properties: props }),
+    });
+    if (!r.ok) console.error('Student-shared write', r.status, await r.text());
+  } catch (err) {
+    console.error('Student-shared error', err);
+  }
 }
 
 module.exports = async (req, res) => {
@@ -112,6 +166,9 @@ module.exports = async (req, res) => {
       console.error('Notion error', notionRes.status, detail);
       return res.status(502).json({ ok: false, error: 'Không ghi được vào Notion.' });
     }
+
+    // Ghi thêm bản CHE cho đối tác Đức (phụ, không chặn kết quả lead chính).
+    await writeStudentShared(token, payload, fullName, lookupCode);
 
     return res.status(200).json({ ok: true, lookup_code: lookupCode });
   } catch (err) {

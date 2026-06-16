@@ -1,9 +1,12 @@
-// Vercel serverless function: nhận HỒ SƠ ỨNG VIÊN do ĐỐI TÁC gửi về DCC → ghi vào 2 database Notion.
+// Vercel serverless function: nhận HỒ SƠ ỨNG VIÊN do ĐỐI TÁC (đã đăng nhập) gửi → ghi vào 2 database Notion.
 // Form web POST JSON tới /api/partner-upload (cùng domain). Token Notion giữ BÍ MẬT ở env Vercel.
 //
+// Đối tác ĐĂNG NHẬP rồi mới upload → tên/mã đối tác lấy từ tài khoản (không nhập tay).
+// Email & SĐT đối tác được CHE BỚT (vd 09••••78) ở CẢ HAI DB; khi cần liên hệ đối tác để lấy đầy đủ.
+//
 // Ghi vào 2 nơi từ cùng 1 lần gửi:
-//   1) DB NỘI BỘ (đầy đủ — có email & SĐT đối tác): NOTION_PARTNER_INTERNAL_DB_ID
-//   2) DB CHIA SẺ ĐỐI TÁC ĐỨC (KHÔNG email/SĐT):     NOTION_PARTNER_SHARED_DB_ID
+//   1) DB NỘI BỘ:                NOTION_PARTNER_INTERNAL_DB_ID
+//   2) DB CHIA SẺ ĐỐI TÁC ĐỨC:   NOTION_PARTNER_SHARED_DB_ID
 //
 // Biến môi trường (Settings → Environment Variables):
 //   NOTION_TOKEN                 = secret integration Notion (dùng chung với /api/lead).
@@ -16,8 +19,8 @@
 const NOTION_PAGES = 'https://api.notion.com/v1/pages';
 const NOTION_FILE_UPLOADS = 'https://api.notion.com/v1/file_uploads';
 const NOTION_VERSION = '2022-06-28';
-const DEFAULT_INTERNAL_DB_ID = '8225875b48ef4957b61510bbafcaf493';
-const DEFAULT_SHARED_DB_ID = 'a4117817b24d439c8347f6544d5bd4ae';
+const DEFAULT_INTERNAL_DB_ID = '727dfb302a92474aa94ecf23aec09d29';
+const DEFAULT_SHARED_DB_ID = 'f29910bf2b6c4678ba3f1dff7d52fdf1';
 
 const LEVELS = ['Chưa học', 'A1', 'A2', 'B1', 'B2'];
 
@@ -28,6 +31,26 @@ const ALLOWED_EXT = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'heic', 'webp',
 
 function clean(value) {
   return (value == null ? '' : String(value)).trim();
+}
+
+// Che bớt SĐT: giữ 2 số đầu + 2 số cuối, vd 0912345678 → 09••••78.
+function maskPhone(value) {
+  const digits = clean(value).replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.length <= 4) return (digits[0] || '') + '•••';
+  return `${digits.slice(0, 2)}••••${digits.slice(-2)}`;
+}
+
+// Che bớt email: giữ 2 ký tự đầu + tên miền, vd nguyen@gmail.com → ng•••@gmail.com.
+function maskEmail(value) {
+  const e = clean(value);
+  if (!e) return '';
+  const at = e.indexOf('@');
+  if (at < 1) return (e[0] || '') + '•••';
+  const local = e.slice(0, at);
+  const domain = e.slice(at + 1);
+  const head = local.slice(0, local.length >= 2 ? 2 : 1);
+  return `${head}•••@${domain}`;
 }
 
 function selectValue(value, allowed) {
@@ -132,10 +155,12 @@ module.exports = async (req, res) => {
   if (typeof payload === 'string') { try { payload = JSON.parse(payload); } catch { payload = {}; } }
   payload = payload || {};
 
+  // Tên/mã đối tác lấy từ tài khoản đã đăng nhập (client gửi kèm).
   const partnerName = clean(payload.partner_name);
   if (!partnerName) {
-    return res.status(400).json({ ok: false, error: 'Thiếu tên đối tác gửi hồ sơ.' });
+    return res.status(400).json({ ok: false, error: 'Thiếu thông tin đối tác (vui lòng đăng nhập lại).' });
   }
+  const partnerCode = clean(payload.partner_code);
 
   const lookupCode = clean(payload.lookup_code) || `DCC-HS-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
   const candidateName = clean(payload.candidate_name);
@@ -143,6 +168,10 @@ module.exports = async (req, res) => {
   const level = selectValue(payload.german_level, LEVELS);
   const career = clean(payload.career);
   const note = clean(payload.note);
+
+  // Email & SĐT đối tác → CHE BỚT (cả nội bộ lẫn gửi Đức).
+  const emailMasked = maskEmail(payload.partner_email);
+  const phoneMasked = maskPhone(payload.partner_phone);
 
   const rawFiles = Array.isArray(payload.files) ? payload.files : [];
 
@@ -154,26 +183,27 @@ module.exports = async (req, res) => {
     sharedFiles = await uploadFiles(token, rawFiles);
   }
 
-  // ===== DB NỘI BỘ (đầy đủ: có email + SĐT đối tác) =====
+  // ===== DB NỘI BỘ =====
   const internalProps = {
     'Họ tên ứng viên': { title: [{ text: { content: title } }] },
     'Đối tác gửi': { rich_text: richText(partnerName) },
+    'Mã đối tác': { rich_text: richText(partnerCode) },
+    'Email đối tác': { rich_text: richText(emailMasked) },
+    'SĐT đối tác': { rich_text: richText(phoneMasked) },
     'Ngành / nghề': { rich_text: richText(career) },
     'Ghi chú': { rich_text: richText(note) },
     'Mã hồ sơ': { rich_text: richText(lookupCode) },
     'Trạng thái': { select: { name: 'Mới nhận' } },
   };
-  const partnerEmail = clean(payload.partner_email);
-  if (partnerEmail) internalProps['Email đối tác'] = { email: partnerEmail };
-  const partnerPhone = clean(payload.partner_phone);
-  if (partnerPhone) internalProps['SĐT / Zalo đối tác'] = { phone_number: partnerPhone };
   if (level) internalProps['Trình độ tiếng Đức'] = { select: level };
   if (internalFiles.length) internalProps['Hồ sơ đính kèm'] = filesProp(internalFiles);
 
-  // ===== DB CHIA SẺ ĐỐI TÁC ĐỨC (KHÔNG email/SĐT) =====
+  // ===== DB CHIA SẺ ĐỐI TÁC ĐỨC (email/SĐT cũng đã che) =====
   const sharedProps = {
     'Họ tên ứng viên': { title: [{ text: { content: title } }] },
     'Đối tác giới thiệu': { rich_text: richText(partnerName) },
+    'Email': { rich_text: richText(emailMasked) },
+    'Số điện thoại': { rich_text: richText(phoneMasked) },
     'Ngành / nghề': { rich_text: richText(career) },
     'Ghi chú': { rich_text: richText(note) },
     'Mã hồ sơ': { rich_text: richText(lookupCode) },
@@ -183,7 +213,7 @@ module.exports = async (req, res) => {
   if (sharedFiles.length) sharedProps['Hồ sơ đính kèm'] = filesProp(sharedFiles);
 
   try {
-    // DB nội bộ là nguồn chính (anh phải nắm được). Lỗi ở đây → báo 502.
+    // DB nội bộ là nguồn chính. Lỗi ở đây → báo 502.
     const internalOk = await createPage(token, internalDbId, internalProps);
     if (!internalOk) {
       return res.status(502).json({ ok: false, error: 'Không ghi được vào Notion (DB nội bộ).' });
