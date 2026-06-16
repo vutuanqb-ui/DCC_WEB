@@ -5,7 +5,7 @@
 //      (2 bản: nội bộ + chia sẻ Đức vì mỗi file_upload id chỉ gắn 1 nơi) → trả {internalId, sharedId}.
 //   2) action='create' (mặc định): client gửi thông tin hồ sơ + mảng uploaded[] → tạo 2 trang Notion.
 //
-// Nhận MỌI loại file, tối đa 50 file, mỗi file ≤ ~4MB. Email/SĐT đối tác CHE BỚT ở cả 2 DB.
+// Nhận MỌI loại file, tối đa 50 file, mỗi file ≤ ~4MB. Email/SĐT đối tác: DB nội bộ giữ THẬT, DB chia sẻ Đức CHE BỚT.
 //
 // Env: NOTION_TOKEN, NOTION_PARTNER_INTERNAL_DB_ID, NOTION_PARTNER_SHARED_DB_ID.
 // BẮT BUỘC Share CẢ HAI database với integration NOTION_TOKEN, nếu không → 502.
@@ -157,6 +157,8 @@ module.exports = async (req, res) => {
   const kmk = clean(payload.kmk_zab);
   const naric = clean(payload.naric);
   const note = clean(payload.note);
+  const emailReal = clean(payload.partner_email);
+  const phoneReal = clean(payload.partner_phone);
   const emailMasked = maskEmail(payload.partner_email);
   const phoneMasked = maskPhone(payload.partner_phone);
 
@@ -169,8 +171,8 @@ module.exports = async (req, res) => {
     'Họ tên ứng viên': { title: [{ text: { content: title } }] },
     'Đối tác gửi': { rich_text: richText(partnerName) },
     'Mã đối tác': { rich_text: richText(partnerCode) },
-    'Email đối tác': { rich_text: richText(emailMasked) },
-    'SĐT đối tác': { rich_text: richText(phoneMasked) },
+    'Email đối tác': { rich_text: richText(emailReal) },
+    'SĐT đối tác': { rich_text: richText(phoneReal) },
     'Ngành / nghề': { rich_text: richText(career) },
     'Vị trí mong muốn': { rich_text: richText(location) },
     'KMK/ZAB': { rich_text: richText(kmk) },
@@ -183,7 +185,7 @@ module.exports = async (req, res) => {
   if (level) internalProps['Trình độ tiếng Đức'] = { select: level };
   if (internalFiles.length) internalProps['Hồ sơ đính kèm'] = filesProp(internalFiles);
 
-  // ===== DB CHIA SẺ ĐỐI TÁC ĐỨC (email/SĐT cũng đã che) =====
+  // ===== DB CHIA SẺ ĐỐI TÁC ĐỨC (email/SĐT che bớt) =====
   const sharedProps = {
     'Họ tên ứng viên': { title: [{ text: { content: title } }] },
     'Đối tác giới thiệu': { rich_text: richText(partnerName) },
