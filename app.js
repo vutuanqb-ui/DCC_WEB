@@ -771,23 +771,35 @@ function renderPartnerPortal() {
     ['🎓', 'Hỗ trợ chuyên môn', 'Tài liệu, đào tạo và đội ngũ tư vấn của DCC luôn sẵn sàng đồng hành cùng đối tác.'],
     ['⏱️', 'Phản hồi tận tâm', 'Đội ngũ phụ trách đối tác riêng, phản hồi nhanh và hỗ trợ bạn đến cùng.']
   ];
-  return `<section class="page-hero"><div class="container"><p class="eyebrow">Đối tác</p><h1>Đồng hành cùng DCC — chúng tôi trân trọng từng đối tác</h1><p>Với DCC, thành công của đối tác chính là thành công của chúng tôi. Mỗi học viên bạn gửi gắm đều được chăm sóc minh bạch, có trách nhiệm và theo dõi đến khi sang Đức an toàn.</p><div class="hero-actions"><a class="btn primary" data-scroll="partner-register">Đăng ký hợp tác</a><a class="btn ghost" href="#/hoc-vien">Đăng nhập đối tác</a></div></div></section>
+  return `<section class="page-hero"><div class="container"><p class="eyebrow">Đối tác</p><h1>Gửi hồ sơ ứng viên về DCC</h1><p>Dành cho đối tác đã hợp tác cùng DCC: chỉ cần tải hồ sơ ứng viên lên ngay tại đây. Bạn không phải tạo tài khoản — chúng tôi chỉ cần biết hồ sơ này do đối tác nào gửi để tiếp nhận và phản hồi sớm nhất.</p><div class="hero-actions"><a class="btn primary" data-scroll="partner-upload">Tải hồ sơ lên</a><a class="btn ghost" href="#/lien-he">Liên hệ DCC</a></div></div></section>
   <section class="section"><div class="container">
     ${sectionHeader('Vì sao hợp tác với DCC', 'Mối quan hệ xây trên sự minh bạch và tôn trọng', 'Chúng tôi không xem đối tác là một kênh giao dịch — mà là người đồng hành cùng đưa học viên Việt sang Đức.')}
     <div class="why-grid">${benefits.map(([icon, title, text]) => `<article><span>${icon}</span><h3>${title}</h3><p>${text}</p></article>`).join('')}</div>
   </div></section>
-  <section class="section register-section" id="partner-register"><div class="container">
-    ${sectionHeader('Đăng ký đối tác', 'Trở thành đối tác của DCC', 'Tạo tài khoản đối tác (cá nhân hoặc công ty) và tự đặt mật khẩu. Lần sau bạn chỉ cần đăng nhập bằng email hoặc số điện thoại + mật khẩu.')}
-    ${renderPartnerAccountForm()}
-  </div></section>
-  <section class="section"><div class="container">
-    ${sectionHeader('Đã là đối tác?', 'Cổng quản lý dành cho đối tác', 'Sau khi đăng nhập, bạn theo dõi học viên đã gửi, trạng thái hồ sơ và phần dữ liệu thuộc quyền của mình.')}
-    <div class="portal-layout"><aside class="portal-card"><h2>Thống kê đối tác</h2>${['Tổng học viên đã gửi: 24', 'Đang tư vấn: 7', 'Đang học tiếng: 8', 'Đã có hợp đồng: 3', 'Đang visa: 4', 'Đã bay: 2'].map((item) => `<p>${item}</p>`).join('')}</aside><div>${renderPartnerForm()}<div class="table-card"><h2>Danh sách học viên mẫu</h2><table><thead><tr><th>Học viên</th><th>Chương trình</th><th>Trạng thái</th><th>Thiếu hồ sơ</th></tr></thead><tbody><tr><td>Nguyễn Văn A</td><td>Du học nghề</td><td>Đang học tiếng</td><td>Hộ chiếu</td></tr><tr><td>Trần Thị B</td><td>Au-pair</td><td>Chờ phỏng vấn</td><td>Không</td></tr></tbody></table></div></div></div>
+  <section class="section register-section" id="partner-upload"><div class="container">
+    ${sectionHeader('Upload hồ sơ', 'Đối tác tải hồ sơ ứng viên lên', 'Điền tên đối tác để DCC biết hồ sơ do ai gửi, rồi đính kèm file hồ sơ ứng viên (CV, bằng cấp, giấy tờ). DCC sẽ tiếp nhận và liên hệ lại với bạn.')}
+    ${renderPartnerUploadForm()}
   </div></section>`;
 }
 
-function renderPartnerForm() {
-  return `<form class="lead-form compact-form"><legend>Form đối tác gửi học viên</legend><label>Tên đối tác<input name="partner_name"></label><label>Mã đối tác<input name="partner_code"></label><label>Họ tên học viên<input name="student_name"></label><label>Số điện thoại<input name="phone"></label><label>Email<input name="email"></label><label>Ngày sinh<input type="date" name="birth_date"></label><label>Chương trình quan tâm<input name="program_interest"></label><label>Trình độ tiếng Đức<input name="german_level"></label><label>Bằng cấp<input name="education"></label><label>Ghi chú<textarea rows="3"></textarea></label><label>File đính kèm<input type="file"><small>Đính kèm bằng cấp, CV hoặc giấy tờ liên quan nếu có.</small></label><button class="btn primary" type="button">Gửi thông tin học viên</button></form>`;
+function renderPartnerUploadForm() {
+  const levels = ['Chưa học', 'A1', 'A2', 'B1', 'B2'];
+  return `<form id="partnerUploadForm" class="lead-form account-form-full" novalidate>
+    <legend>Form đối tác gửi hồ sơ ứng viên</legend>
+    <div class="form-grid-2">
+      <label>Tên đối tác gửi *<input name="partner_name" required placeholder="Tên cá nhân / công ty / trung tâm gửi hồ sơ"></label>
+      <label>Họ tên ứng viên<input name="candidate_name" placeholder="Tên ứng viên trong hồ sơ này (nếu có)"></label>
+      <label>Email đối tác<input type="email" name="partner_email" placeholder="Để DCC liên hệ lại — không bắt buộc"></label>
+      <label>SĐT / Zalo đối tác<input name="partner_phone" placeholder="Để DCC liên hệ lại — không bắt buộc"></label>
+      <label>Ngành / nghề ứng viên<input name="career" placeholder="VD: Điều dưỡng, Nhà hàng – khách sạn..."></label>
+      <label>Trình độ tiếng Đức<select name="german_level"><option value="">— Chọn trình độ —</option>${levels.map((l) => `<option>${l}</option>`).join('')}</select></label>
+    </div>
+    <label>Ghi chú<textarea name="note" rows="3" placeholder="Thông tin thêm về ứng viên / bộ hồ sơ gửi kèm"></textarea></label>
+    <label>File hồ sơ<input type="file" data-partner-files multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.heic,.webp,.zip,.rar"><small>Đính kèm CV, bằng cấp, giấy tờ của ứng viên. Tối đa 5 file, tổng dưới ~3MB. File lớn hơn vui lòng nén .zip hoặc liên hệ DCC để gửi qua kênh khác.</small></label>
+    <p class="form-note">🔒 Email và số điện thoại chỉ DCC nắm để liên hệ lại với bạn — sẽ không xuất hiện trong hồ sơ chia sẻ cho đối tác tại Đức.</p>
+    <button class="btn primary" type="submit">Gửi hồ sơ</button>
+    <p id="partnerUploadMessage" class="form-message" role="status"></p>
+  </form>`;
 }
 
 function renderInternalApp() {
@@ -817,6 +829,9 @@ function bindInteractions() {
 
   const transferForm = $('#jobTransferForm');
   if (transferForm) bindJobTransferForm(transferForm);
+
+  const partnerUpload = $('#partnerUploadForm');
+  if (partnerUpload) partnerUpload.addEventListener('submit', submitPartnerUpload);
 
   const form = $('#leadForm');
   if (form) bindLeadForm(form);
@@ -1489,6 +1504,50 @@ async function submitJobTransfer(event) {
   } catch (error) {
     console.error(error);
     setMsg('Hiện chưa gửi được. Vui lòng thử lại, hoặc liên hệ hotline/Zalo/WhatsApp 076 778 7879 để được hỗ trợ.', 'error');
+  }
+}
+
+async function submitPartnerUpload(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const msg = $('#partnerUploadMessage');
+  const setMsg = (text, type = '') => { if (msg) { msg.textContent = text; msg.className = `form-message ${type}`; } };
+  const payload = Object.fromEntries(new FormData(form).entries());
+  if (!(payload.partner_name || '').trim()) { setMsg('Vui lòng điền tên đối tác gửi hồ sơ.', 'error'); return; }
+
+  // Đọc file hồ sơ (nếu có) — tối đa 5 file, tổng dưới ~3MB.
+  const fileInput = $('[data-partner-files]', form);
+  const files = fileInput && fileInput.files ? Array.from(fileInput.files).slice(0, 5) : [];
+  if (!files.length) { setMsg('Vui lòng đính kèm ít nhất 1 file hồ sơ ứng viên.', 'error'); return; }
+  const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
+  if (totalBytes > 3 * 1024 * 1024) {
+    setMsg('Tổng dung lượng file vượt ~3MB. Vui lòng nén .zip hoặc liên hệ DCC để gửi qua kênh khác.', 'error');
+    return;
+  }
+
+  payload.lookup_code = `DCC-HS-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  delete payload.files;
+
+  try {
+    setMsg('Đang tải hồ sơ lên...', '');
+    payload.files = await Promise.all(files.map(readFileAsBase64));
+    const config = window.DCC_PUBLIC_CONFIG || {};
+    const endpoint = config.PARTNER_UPLOAD_API || '/api/partner-upload';
+    const response = await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok || !data.ok) throw new Error(data.error || `HTTP ${response.status}`);
+    if (data.lookup_code) payload.lookup_code = data.lookup_code;
+    form.reset();
+    const fileMsg = data.files_uploaded ? ` Đã nhận ${data.files_uploaded} file hồ sơ.` : '';
+    setMsg(`Cảm ơn bạn! DCC đã nhận hồ sơ và sẽ liên hệ lại sớm.${fileMsg} Mã hồ sơ: ${payload.lookup_code}`, 'success');
+    if (window.dccTrack) dccTrack('Lead', { content_name: 'Đối tác gửi hồ sơ ứng viên' });
+  } catch (error) {
+    console.error(error);
+    setMsg('Hiện chưa gửi được. Vui lòng thử lại, hoặc liên hệ hotline/Zalo 076 778 7879 để được hỗ trợ.', 'error');
   }
 }
 

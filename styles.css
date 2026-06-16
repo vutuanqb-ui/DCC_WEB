@@ -354,6 +354,9 @@ p:last-child { margin-bottom: 0; }
 .form-section-title { font-family: "Fraunces", serif; color: var(--navy); font-size: 19px; font-weight: 600; margin: 0 0 var(--s2); padding-bottom: 8px; border-bottom: 1px solid var(--line); }
 .account-form-full .form-section-title:not(:first-child) { margin-top: var(--s4); }
 .partner-type-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); margin-bottom: var(--s2); }
+.form-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s3); }
+.form-note { font-size: 12.5px; color: var(--navy); margin: 0; background: var(--gold-soft); padding: 11px 13px; border-radius: var(--r-md); line-height: 1.5; }
+@media (max-width: 720px) { .form-grid-2 { grid-template-columns: 1fr; } }
 .radio-card { display: flex; align-items: flex-start; gap: 11px; padding: var(--s3); border: 1px solid var(--line-cool); border-radius: var(--r-md); cursor: pointer; transition: border-color .2s, background .2s; font-weight: 500; }
 .radio-card:has(input:checked) { border-color: var(--gold); background: var(--gold-soft); }
 .radio-card input { margin-top: 3px; width: auto; }
