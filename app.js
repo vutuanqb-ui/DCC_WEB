@@ -832,7 +832,7 @@ function renderPartnerUploadForm(account) {
       </div>
     </div>
     <label>Ghi chú<textarea name="note" rows="3" placeholder="Thông tin thêm về ứng viên / bộ hồ sơ gửi kèm"></textarea></label>
-    <label>File hồ sơ<input type="file" data-partner-files multiple><small>Đính kèm mọi loại file (CV, bằng cấp, ảnh, giấy tờ...). Tối đa 50 file, mỗi file dưới ~4MB. File nặng hơn vui lòng nén lại hoặc liên hệ DCC.</small></label>
+    <label>File hồ sơ<input type="file" data-partner-files multiple><small>Đính kèm mọi loại file (CV, bằng cấp, ảnh, giấy tờ...). Tối đa 50 file. Ảnh chụp giấy tờ sẽ được TỰ ĐỘNG NÉN khi gửi nên cứ chụp thoải mái; riêng file tài liệu (PDF...) nên dưới ~3MB, nặng hơn vui lòng tách nhỏ hoặc gửi qua Zalo DCC.</small></label>
     <p class="form-note">🔒 Email và số điện thoại sẽ được che bớt (vd 09••••78) ở cả bản nội bộ lẫn bản gửi đối tác tại Đức — khi cần DCC liên hệ trực tiếp với bạn để lấy đầy đủ.</p>
     <button class="btn primary" type="submit">Gửi hồ sơ</button>
     <p id="partnerUploadMessage" class="form-message" role="status"></p>
@@ -1508,6 +1508,42 @@ function readFileAsBase64(file) {
   });
 }
 
+// Vercel chỉ nhận body ≤ 4.5MB/request; base64 phình ~37% nên file thô phải < ~3MB.
+const UPLOAD_SAFE_BYTES = 3 * 1024 * 1024;
+
+// Nén ảnh ngay trên trình duyệt nếu vượt ngưỡng: thu nhỏ kích thước + hạ chất lượng JPEG
+// (vẫn đủ nét để đọc giấy tờ) để lọt giới hạn body của Vercel. Cũng tự đổi HEIC/PNG nặng → JPEG.
+// Trả về 1 File mới; nếu không phải ảnh / không nén được thì trả lại file gốc.
+function compressImageFile(file, maxBytes) {
+  return new Promise((resolve) => {
+    if (!file.type || !file.type.startsWith('image/') || file.size <= maxBytes) { resolve(file); return; }
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    const done = (out) => { URL.revokeObjectURL(url); resolve(out); };
+    img.onerror = () => done(file); // trình duyệt không đọc được (vd HEIC trên Chrome) → giữ nguyên, sẽ báo ở bước kiểm tra
+    img.onload = async () => {
+      let { width, height } = img;
+      const MAX_DIM = 2200; // đủ nét để đọc chữ trên giấy tờ
+      if (Math.max(width, height) > MAX_DIM) {
+        const r = MAX_DIM / Math.max(width, height);
+        width = Math.round(width * r); height = Math.round(height * r);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = width; canvas.height = height;
+      canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+      const toJpeg = (q) => new Promise((res) => canvas.toBlob((b) => res(b), 'image/jpeg', q));
+      const newName = file.name.replace(/\.[^.]+$/, '') + '.jpg';
+      for (const q of [0.82, 0.7, 0.6, 0.5, 0.4]) {
+        const blob = await toJpeg(q);
+        if (blob && blob.size <= maxBytes) { done(new File([blob], newName, { type: 'image/jpeg' })); return; }
+      }
+      const last = await toJpeg(0.4);
+      done(last ? new File([last], newName, { type: 'image/jpeg' }) : file);
+    };
+    img.src = url;
+  });
+}
+
 async function submitJobTransfer(event) {
   event.preventDefault();
   const form = event.currentTarget;
@@ -1573,8 +1609,6 @@ async function submitPartnerUpload(event) {
   const fileInput = $('[data-partner-files]', form);
   const files = fileInput && fileInput.files ? Array.from(fileInput.files).slice(0, 50) : [];
   if (!files.length) { setMsg('Vui lòng đính kèm ít nhất 1 file hồ sơ ứng viên.', 'error'); return; }
-  const tooBig = files.find((f) => f.size > 4 * 1024 * 1024);
-  if (tooBig) { setMsg(`File "${tooBig.name}" nặng hơn ~4MB. Vui lòng nén lại hoặc tách nhỏ rồi gửi.`, 'error'); return; }
 
   payload.lookup_code = `DCC-HS-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
@@ -1589,8 +1623,17 @@ async function submitPartnerUpload(event) {
     // Bước 1: tải từng file lên (tuần tự, có hiển thị tiến độ).
     const uploaded = [];
     for (let i = 0; i < files.length; i++) {
-      setMsg(`Đang tải file ${i + 1}/${files.length}: ${files[i].name}...`, '');
-      const fileData = await readFileAsBase64(files[i]);
+      let file = files[i];
+      // Ảnh quá lớn → tự nén trong trình duyệt cho lọt giới hạn body của Vercel.
+      if (file.type && file.type.startsWith('image/') && file.size > UPLOAD_SAFE_BYTES) {
+        setMsg(`Đang nén ảnh ${i + 1}/${files.length}: ${file.name}...`, '');
+        file = await compressImageFile(file, Math.round(2.5 * 1024 * 1024));
+      }
+      if (file.size > UPLOAD_SAFE_BYTES) {
+        throw new Error(`File "${file.name}" vẫn nặng hơn ~3MB. Vui lòng nén/tách nhỏ (PDF), hoặc gửi file gốc qua Zalo 076 778 7879 để DCC nhận trực tiếp`);
+      }
+      setMsg(`Đang tải file ${i + 1}/${files.length}: ${file.name}...`, '');
+      const fileData = await readFileAsBase64(file);
       const res = await post({ action: 'upload_file', file: fileData });
       uploaded.push(res.file);
     }
