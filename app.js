@@ -832,7 +832,7 @@ function renderPartnerUploadForm(account) {
       </div>
     </div>
     <label>Ghi chú<textarea name="note" rows="3" placeholder="Thông tin thêm về ứng viên / bộ hồ sơ gửi kèm"></textarea></label>
-    <label>File hồ sơ<input type="file" data-partner-files multiple><small>Đính kèm mọi loại file (CV, bằng cấp, ảnh, giấy tờ...). Tối đa 50 file. Ảnh chụp giấy tờ sẽ được TỰ ĐỘNG NÉN khi gửi nên cứ chụp thoải mái; riêng file tài liệu (PDF...) nên dưới ~3MB, nặng hơn vui lòng tách nhỏ hoặc gửi qua Zalo DCC.</small></label>
+    <label>File hồ sơ<input type="file" data-partner-files multiple><small>Đính kèm mọi loại file (CV, bằng cấp, ảnh, giấy tờ...). Tối đa 50 file. Ảnh VÀ PDF sẽ được TỰ ĐỘNG NÉN khi gửi nên cứ chụp/quét thoải mái; các định dạng khác (ZIP, DOCX...) nên dưới ~3MB, nặng hơn vui lòng tách nhỏ hoặc gửi qua Zalo DCC.</small></label>
     <p class="form-note">🔒 Email và số điện thoại sẽ được che bớt (vd 09••••78) ở cả bản nội bộ lẫn bản gửi đối tác tại Đức — khi cần DCC liên hệ trực tiếp với bạn để lấy đầy đủ.</p>
     <button class="btn primary" type="submit">Gửi hồ sơ</button>
     <p id="partnerUploadMessage" class="form-message" role="status"></p>
@@ -1546,6 +1546,110 @@ function compressImageFile(file, maxBytes) {
   });
 }
 
+// ===== Nén PDF ngay trên trình duyệt =====
+// PDF không nén được kiểu vẽ-lại như ảnh, nên ta RASTER hoá: vẽ từng trang ra ảnh JPEG rồi
+// đóng gói lại thành PDF mới nhẹ hơn (hạ độ phân giải + chất lượng dần đến khi đạt ngưỡng).
+// Lưu ý: PDF sau khi nén là ảnh các trang (không còn chữ chọn-copy được) — đánh đổi để gửi được.
+// Thư viện pdf.js + jsPDF chỉ nạp KHI cần (lazy) để không làm nặng web.
+// Host same-origin (thư mục /vendor) để tránh lỗi worker cross-origin + không phụ thuộc CDN khi đối tác dùng.
+const PDFJS_SRC = '/vendor/pdf.min.js';
+const PDFJS_WORKER = '/vendor/pdf.worker.min.js';
+const JSPDF_SRC = '/vendor/jspdf.umd.min.js';
+
+function loadScriptOnce(src) {
+  return new Promise((resolve, reject) => {
+    if (document.querySelector(`script[data-src="${src}"]`)) { resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.dataset.src = src;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('load fail: ' + src));
+    document.head.appendChild(s);
+  });
+}
+
+let _pdfLibsPromise = null;
+function ensurePdfLibs() {
+  if (!_pdfLibsPromise) {
+    _pdfLibsPromise = (async () => {
+      await loadScriptOnce(PDFJS_SRC);
+      await loadScriptOnce(JSPDF_SRC);
+      if (window.pdfjsLib) window.pdfjsLib.GlobalWorkerOptions.workerSrc = PDFJS_WORKER;
+    })().catch((e) => { _pdfLibsPromise = null; throw e; });
+  }
+  return _pdfLibsPromise;
+}
+
+// Vẽ TẤT CẢ trang PDF ra canvas MỘT LẦN (bước tốn thời gian nhất). Cạnh dài mỗi trang được
+// giới hạn ≈ maxDim px (đủ nét đọc giấy tờ) để render nhanh + ảnh nhẹ, dù PDF gốc to cỡ nào.
+async function rasterizePdf(arrayBuffer, maxDim) {
+  const pdf = await window.pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+  const canvases = [];
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const page = await pdf.getPage(p);
+    const base = page.getViewport({ scale: 1 });
+    const scale = Math.min(2, maxDim / Math.max(base.width, base.height));
+    const viewport = page.getViewport({ scale });
+    const canvas = document.createElement('canvas');
+    canvas.width = Math.ceil(viewport.width);
+    canvas.height = Math.ceil(viewport.height);
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height); // nền trắng (PDF có thể trong suốt)
+    await page.render({ canvasContext: ctx, viewport }).promise;
+    canvases.push(canvas);
+  }
+  return canvases;
+}
+
+// Thu nhỏ 1 canvas theo hệ số (không chạy lại pdf.js) — dùng khi cần giảm dung lượng thêm.
+function shrinkCanvas(src, factor) {
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(src.width * factor));
+  c.height = Math.max(1, Math.round(src.height * factor));
+  c.getContext('2d').drawImage(src, 0, 0, c.width, c.height);
+  return c;
+}
+
+// Đóng gói mảng canvas thành 1 PDF (ảnh JPEG chất lượng q). Trả về Blob.
+function buildPdfFromCanvases(canvases, q) {
+  const JsPDF = window.jspdf && window.jspdf.jsPDF;
+  if (!JsPDF) return null;
+  let doc = null;
+  for (const canvas of canvases) {
+    const w = canvas.width, h = canvas.height;
+    const orient = w >= h ? 'l' : 'p';
+    if (!doc) doc = new JsPDF({ orientation: orient, unit: 'pt', format: [w, h], compress: true });
+    else doc.addPage([w, h], orient);
+    doc.addImage(canvas.toDataURL('image/jpeg', q), 'JPEG', 0, 0, w, h);
+  }
+  return doc ? doc.output('blob') : null;
+}
+
+// Nén 1 file PDF xuống dưới maxBytes (nếu được). Render trang CHỈ 1 LẦN, rồi chỉ hạ chất lượng /
+// thu nhỏ canvas đã có → nhanh hơn nhiều. Không phải PDF / lỗi → trả lại file gốc.
+async function compressPdfFile(file, maxBytes) {
+  try {
+    await ensurePdfLibs();
+    if (!window.pdfjsLib || !window.jspdf) return file;
+    let canvases = await rasterizePdf(await file.arrayBuffer(), 1600); // render 1 lần, cạnh dài ≤1600px
+    let smallest = null;
+    const pack = (blob) => new File([blob], file.name, { type: 'application/pdf' });
+    // 2 vòng thu nhỏ; mỗi vòng thử vài mức chất lượng (rẻ vì không render lại pdf.js).
+    for (let round = 0; round < 3; round++) {
+      for (const q of [0.7, 0.55, 0.45]) {
+        const blob = buildPdfFromCanvases(canvases, q);
+        if (!blob) break;
+        if (!smallest || blob.size < smallest.size) smallest = blob;
+        if (blob.size <= maxBytes) return pack(blob);
+      }
+      canvases = canvases.map((c) => shrinkCanvas(c, 0.75)); // còn lớn → thu nhỏ rồi thử lại
+    }
+    return smallest ? pack(smallest) : file;
+  } catch (e) {
+    console.error('compressPdfFile error', e);
+    return file;
+  }
+}
+
 async function submitJobTransfer(event) {
   event.preventDefault();
   const form = event.currentTarget;
@@ -1627,12 +1731,17 @@ async function submitPartnerUpload(event) {
     const prepared = [];
     for (let i = 0; i < files.length; i++) {
       let file = files[i];
-      if (file.type && file.type.startsWith('image/') && file.size > UPLOAD_IMG_TARGET) {
+      const isImage = file.type && file.type.startsWith('image/');
+      const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name || '');
+      if (isImage && file.size > UPLOAD_IMG_TARGET) {
         setMsg(`Đang nén ảnh ${i + 1}/${files.length}...`, '');
         file = await compressImageFile(file, UPLOAD_IMG_TARGET);
+      } else if (isPdf && file.size > UPLOAD_SAFE_BYTES) {
+        setMsg(`Đang nén PDF ${i + 1}/${files.length} (có thể mất ít giây)...`, '');
+        file = await compressPdfFile(file, Math.round(2.6 * 1024 * 1024));
       }
       if (file.size > UPLOAD_SAFE_BYTES) {
-        throw new Error(`File "${file.name}" vẫn nặng hơn ~3MB. Vui lòng nén/tách nhỏ (PDF), hoặc gửi file gốc qua Zalo 076 778 7879 để DCC nhận trực tiếp`);
+        throw new Error(`File "${file.name}" vẫn nặng hơn ~3MB sau khi nén. Vui lòng tách nhỏ, hoặc gửi file gốc qua Zalo 076 778 7879 để DCC nhận trực tiếp`);
       }
       prepared.push(file);
     }
