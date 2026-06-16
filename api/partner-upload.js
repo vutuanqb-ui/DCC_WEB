@@ -132,11 +132,11 @@ module.exports = async (req, res) => {
   if (payload.action === 'upload_file') {
     const f = payload.file;
     if (!f || !f.data) return res.status(400).json({ ok: false, error: 'Thiếu dữ liệu file.' });
-    const internal = await uploadOneFile(token, f);
+    // Upload 2 bản (nội bộ + chia sẻ Đức) SONG SONG để nhanh gấp đôi.
+    const [internal, shared] = await Promise.all([uploadOneFile(token, f), uploadOneFile(token, f)]);
     if (!internal) {
       return res.status(502).json({ ok: false, error: 'Tải file lên Notion thất bại (file quá lớn hoặc chưa kết nối Notion).' });
     }
-    const shared = await uploadOneFile(token, f);
     return res.status(200).json({ ok: true, file: { name: internal.name, internalId: internal.id, sharedId: shared ? shared.id : null } });
   }
 

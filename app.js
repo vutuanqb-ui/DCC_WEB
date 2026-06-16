@@ -1510,6 +1510,8 @@ function readFileAsBase64(file) {
 
 // Vercel chỉ nhận body ≤ 4.5MB/request; base64 phình ~37% nên file thô phải < ~3MB.
 const UPLOAD_SAFE_BYTES = 3 * 1024 * 1024;
+// Mục tiêu nén ảnh xuống ~1.2MB: gửi nhanh + Notion upload nhanh, vẫn đủ nét đọc giấy tờ.
+const UPLOAD_IMG_TARGET = Math.round(1.2 * 1024 * 1024);
 
 // Nén ảnh ngay trên trình duyệt nếu vượt ngưỡng: thu nhỏ kích thước + hạ chất lượng JPEG
 // (vẫn đủ nét để đọc giấy tờ) để lọt giới hạn body của Vercel. Cũng tự đổi HEIC/PNG nặng → JPEG.
@@ -1620,23 +1622,36 @@ async function submitPartnerUpload(event) {
   const btn = $('button[type="submit"]', form);
   try {
     if (btn) btn.disabled = true;
-    // Bước 1: tải từng file lên (tuần tự, có hiển thị tiến độ).
-    const uploaded = [];
+    // Bước 1a: nén ảnh để gửi nhanh (ảnh >~1.2MB đều thu nhỏ — vẫn nét đọc giấy tờ,
+    // mà payload nhẹ đi nhiều nên upload nhanh hơn hẳn).
+    const prepared = [];
     for (let i = 0; i < files.length; i++) {
       let file = files[i];
-      // Ảnh quá lớn → tự nén trong trình duyệt cho lọt giới hạn body của Vercel.
-      if (file.type && file.type.startsWith('image/') && file.size > UPLOAD_SAFE_BYTES) {
-        setMsg(`Đang nén ảnh ${i + 1}/${files.length}: ${file.name}...`, '');
-        file = await compressImageFile(file, Math.round(2.5 * 1024 * 1024));
+      if (file.type && file.type.startsWith('image/') && file.size > UPLOAD_IMG_TARGET) {
+        setMsg(`Đang nén ảnh ${i + 1}/${files.length}...`, '');
+        file = await compressImageFile(file, UPLOAD_IMG_TARGET);
       }
       if (file.size > UPLOAD_SAFE_BYTES) {
         throw new Error(`File "${file.name}" vẫn nặng hơn ~3MB. Vui lòng nén/tách nhỏ (PDF), hoặc gửi file gốc qua Zalo 076 778 7879 để DCC nhận trực tiếp`);
       }
-      setMsg(`Đang tải file ${i + 1}/${files.length}: ${file.name}...`, '');
-      const fileData = await readFileAsBase64(file);
-      const res = await post({ action: 'upload_file', file: fileData });
-      uploaded.push(res.file);
+      prepared.push(file);
     }
+    // Bước 1b: tải lên SONG SONG (tối đa 3 file cùng lúc) thay vì nối đuôi → nhanh hơn nhiều.
+    const uploaded = new Array(prepared.length);
+    let done = 0;
+    const queue = prepared.map((file, idx) => ({ file, idx }));
+    setMsg(`Đang tải hồ sơ lên... (0/${prepared.length} file)`, '');
+    const worker = async () => {
+      while (queue.length) {
+        const { file, idx } = queue.shift();
+        const fileData = await readFileAsBase64(file);
+        const res = await post({ action: 'upload_file', file: fileData });
+        uploaded[idx] = res.file;
+        done += 1;
+        setMsg(`Đang tải hồ sơ lên... (${done}/${prepared.length} file)`, '');
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(3, prepared.length) }, worker));
     // Bước 2: tạo hồ sơ với toàn bộ thông tin + file đã tải.
     setMsg('Đang lưu hồ sơ...', '');
     const data = await post({ ...payload, uploaded });
