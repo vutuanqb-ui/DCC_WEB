@@ -363,6 +363,8 @@ p:last-child { margin-bottom: 0; }
 .upload-gate .account-form { text-align: left; margin-top: var(--s3); }
 .upload-gate .login-foot { margin-top: var(--s3); font-size: 13px; }
 .upload-who { font-size: 13px; color: var(--muted); margin: 0 0 var(--s2); }
+.lead-form .wish-note { background: var(--bg); border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s3); }
+.wish-note-title { margin: 0 0 var(--s2); font-weight: 600; color: var(--navy); font-size: 14px; }
 .radio-card { display: flex; align-items: flex-start; gap: 11px; padding: var(--s3); border: 1px solid var(--line-cool); border-radius: var(--r-md); cursor: pointer; transition: border-color .2s, background .2s; font-weight: 500; }
 .radio-card:has(input:checked) { border-color: var(--gold); background: var(--gold-soft); }
 .radio-card input { margin-top: 3px; width: auto; }

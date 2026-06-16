@@ -1,20 +1,14 @@
 // Vercel serverless function: nhận HỒ SƠ ỨNG VIÊN do ĐỐI TÁC (đã đăng nhập) gửi → ghi vào 2 database Notion.
-// Form web POST JSON tới /api/partner-upload (cùng domain). Token Notion giữ BÍ MẬT ở env Vercel.
 //
-// Đối tác ĐĂNG NHẬP rồi mới upload → tên/mã đối tác lấy từ tài khoản (không nhập tay).
-// Email & SĐT đối tác được CHE BỚT (vd 09••••78) ở CẢ HAI DB; khi cần liên hệ đối tác để lấy đầy đủ.
+// Vì Vercel giới hạn body ~4.5MB/request, KHÔNG gửi tất cả file trong 1 lần. Luồng 2 bước:
+//   1) action='upload_file': client gửi LẦN LƯỢT từng file (base64) → server upload lên Notion
+//      (2 bản: nội bộ + chia sẻ Đức vì mỗi file_upload id chỉ gắn 1 nơi) → trả {internalId, sharedId}.
+//   2) action='create' (mặc định): client gửi thông tin hồ sơ + mảng uploaded[] → tạo 2 trang Notion.
 //
-// Ghi vào 2 nơi từ cùng 1 lần gửi:
-//   1) DB NỘI BỘ:                NOTION_PARTNER_INTERNAL_DB_ID
-//   2) DB CHIA SẺ ĐỐI TÁC ĐỨC:   NOTION_PARTNER_SHARED_DB_ID
+// Nhận MỌI loại file, tối đa 50 file, mỗi file ≤ ~4MB. Email/SĐT đối tác CHE BỚT ở cả 2 DB.
 //
-// Biến môi trường (Settings → Environment Variables):
-//   NOTION_TOKEN                 = secret integration Notion (dùng chung với /api/lead).
-//   NOTION_PARTNER_INTERNAL_DB_ID= (tuỳ chọn) ID DB nội bộ; mặc định hardcode bên dưới.
-//   NOTION_PARTNER_SHARED_DB_ID  = (tuỳ chọn) ID DB chia sẻ đối tác Đức; mặc định hardcode bên dưới.
-//
-// BẮT BUỘC: Share CẢ HAI database với integration NOTION_TOKEN (••• → Connections → Add).
-// Chưa share → trả 502.
+// Env: NOTION_TOKEN, NOTION_PARTNER_INTERNAL_DB_ID, NOTION_PARTNER_SHARED_DB_ID.
+// BẮT BUỘC Share CẢ HAI database với integration NOTION_TOKEN, nếu không → 502.
 
 const NOTION_PAGES = 'https://api.notion.com/v1/pages';
 const NOTION_FILE_UPLOADS = 'https://api.notion.com/v1/file_uploads';
@@ -23,11 +17,10 @@ const DEFAULT_INTERNAL_DB_ID = '727dfb302a92474aa94ecf23aec09d29';
 const DEFAULT_SHARED_DB_ID = 'f29910bf2b6c4678ba3f1dff7d52fdf1';
 
 const LEVELS = ['Chưa học', 'A1', 'A2', 'B1', 'B2'];
+const DIEN = ['Du học nghề', '18B', '18A', 'Au-pair', 'Thời vụ 8 tháng', 'Khác'];
 
-// Giới hạn upload: tối đa 5 file, tổng ~3MB (giữ dưới hạn body 4.5MB của Vercel sau base64).
-const MAX_FILES = 5;
-const MAX_TOTAL_BYTES = 3 * 1024 * 1024;
-const ALLOWED_EXT = ['pdf', 'jpg', 'jpeg', 'png', 'doc', 'docx', 'heic', 'webp', 'zip', 'rar'];
+const MAX_FILES = 50;
+const MAX_FILE_BYTES = 4 * 1024 * 1024; // mỗi file ~4MB (dưới hạn body 4.5MB của Vercel)
 
 function clean(value) {
   return (value == null ? '' : String(value)).trim();
@@ -47,10 +40,7 @@ function maskEmail(value) {
   if (!e) return '';
   const at = e.indexOf('@');
   if (at < 1) return (e[0] || '') + '•••';
-  const local = e.slice(0, at);
-  const domain = e.slice(at + 1);
-  const head = local.slice(0, local.length >= 2 ? 2 : 1);
-  return `${head}•••@${domain}`;
+  return `${e.slice(0, at).slice(0, 2)}•••@${e.slice(at + 1)}`;
 }
 
 function selectValue(value, allowed) {
@@ -73,57 +63,40 @@ function notionHeaders(token) {
   };
 }
 
-// Upload 1 file lên Notion (single-part). Trả về { id, name } nếu thành công, null nếu lỗi.
-// Lưu ý: mỗi file_upload id chỉ gắn được vào MỘT nơi → muốn ghi vào 2 DB phải upload 2 lần.
+// Upload 1 file lên Notion (single-part), nhận MỌI định dạng. Trả { id, name } hoặc null nếu lỗi.
 async function uploadOneFile(token, file) {
   try {
-    const name = clean(file.name) || 'ho-so';
-    const ext = name.split('.').pop().toLowerCase();
-    if (!ALLOWED_EXT.includes(ext)) return null;
-    const base64 = String(file.data || '').replace(/^data:[^;]+;base64,/, '');
+    const name = (clean(file && file.name) || 'ho-so').slice(0, 200);
+    const base64 = String((file && file.data) || '').replace(/^data:[^;]+;base64,/, '');
     const buffer = Buffer.from(base64, 'base64');
-    if (!buffer.length || buffer.length > MAX_TOTAL_BYTES) return null;
+    if (!buffer.length || buffer.length > MAX_FILE_BYTES) return null;
 
     const createRes = await fetch(NOTION_FILE_UPLOADS, {
       method: 'POST',
       headers: notionHeaders(token),
-      body: JSON.stringify({ mode: 'single_part', filename: name.slice(0, 200) }),
+      body: JSON.stringify({ mode: 'single_part', filename: name }),
     });
     if (!createRes.ok) { console.error('file_upload create', createRes.status, await createRes.text()); return null; }
     const created = await createRes.json();
     const uploadUrl = created.upload_url || `${NOTION_FILE_UPLOADS}/${created.id}/send`;
 
     const form = new FormData();
-    form.append('file', new Blob([buffer], { type: clean(file.type) || 'application/octet-stream' }), name.slice(0, 200));
+    form.append('file', new Blob([buffer], { type: clean(file.type) || 'application/octet-stream' }), name);
     const sendRes = await fetch(uploadUrl, {
       method: 'POST',
       headers: { 'Authorization': `Bearer ${token}`, 'Notion-Version': NOTION_VERSION },
       body: form,
     });
     if (!sendRes.ok) { console.error('file_upload send', sendRes.status, await sendRes.text()); return null; }
-    return { id: created.id, name: name.slice(0, 200) };
+    return { id: created.id, name };
   } catch (err) {
     console.error('uploadOneFile error', err);
     return null;
   }
 }
 
-// Upload danh sách file (đã lọc dung lượng) 1 lần → trả mảng { id, name }.
-async function uploadFiles(token, files) {
-  const uploaded = [];
-  let total = 0;
-  for (const f of files.slice(0, MAX_FILES)) {
-    const raw = String(f && f.data || '').replace(/^data:[^;]+;base64,/, '');
-    total += Math.floor(raw.length * 3 / 4);
-    if (total > MAX_TOTAL_BYTES) break;
-    const result = await uploadOneFile(token, f);
-    if (result) uploaded.push(result);
-  }
-  return uploaded;
-}
-
-function filesProp(uploaded) {
-  return { files: uploaded.map((u) => ({ type: 'file_upload', file_upload: { id: u.id }, name: u.name })) };
+function filesProp(list) {
+  return { files: list.map((u) => ({ type: 'file_upload', file_upload: { id: u.id }, name: u.name })) };
 }
 
 async function createPage(token, databaseId, properties) {
@@ -155,7 +128,19 @@ module.exports = async (req, res) => {
   if (typeof payload === 'string') { try { payload = JSON.parse(payload); } catch { payload = {}; } }
   payload = payload || {};
 
-  // Tên/mã đối tác lấy từ tài khoản đã đăng nhập (client gửi kèm).
+  // ===== BƯỚC 1: upload 1 file (gửi lên cả 2 DB) =====
+  if (payload.action === 'upload_file') {
+    const f = payload.file;
+    if (!f || !f.data) return res.status(400).json({ ok: false, error: 'Thiếu dữ liệu file.' });
+    const internal = await uploadOneFile(token, f);
+    if (!internal) {
+      return res.status(502).json({ ok: false, error: 'Tải file lên Notion thất bại (file quá lớn hoặc chưa kết nối Notion).' });
+    }
+    const shared = await uploadOneFile(token, f);
+    return res.status(200).json({ ok: true, file: { name: internal.name, internalId: internal.id, sharedId: shared ? shared.id : null } });
+  }
+
+  // ===== BƯỚC 2: tạo trang hồ sơ =====
   const partnerName = clean(payload.partner_name);
   if (!partnerName) {
     return res.status(400).json({ ok: false, error: 'Thiếu thông tin đối tác (vui lòng đăng nhập lại).' });
@@ -166,22 +151,18 @@ module.exports = async (req, res) => {
   const candidateName = clean(payload.candidate_name);
   const title = (candidateName || `Hồ sơ ${lookupCode}`).slice(0, 200);
   const level = selectValue(payload.german_level, LEVELS);
+  const dien = selectValue(payload.dien, DIEN);
   const career = clean(payload.career);
+  const location = clean(payload.desired_location);
+  const kmk = clean(payload.kmk_zab);
+  const naric = clean(payload.naric);
   const note = clean(payload.note);
-
-  // Email & SĐT đối tác → CHE BỚT (cả nội bộ lẫn gửi Đức).
   const emailMasked = maskEmail(payload.partner_email);
   const phoneMasked = maskPhone(payload.partner_phone);
 
-  const rawFiles = Array.isArray(payload.files) ? payload.files : [];
-
-  // Upload file 2 lần (mỗi DB 1 bộ) vì file_upload id chỉ gắn được 1 nơi.
-  let internalFiles = [];
-  let sharedFiles = [];
-  if (rawFiles.length) {
-    internalFiles = await uploadFiles(token, rawFiles);
-    sharedFiles = await uploadFiles(token, rawFiles);
-  }
+  const uploaded = Array.isArray(payload.uploaded) ? payload.uploaded.slice(0, MAX_FILES) : [];
+  const internalFiles = uploaded.filter((u) => u && u.internalId).map((u) => ({ id: u.internalId, name: clean(u.name) || 'ho-so' }));
+  const sharedFiles = uploaded.filter((u) => u && u.sharedId).map((u) => ({ id: u.sharedId, name: clean(u.name) || 'ho-so' }));
 
   // ===== DB NỘI BỘ =====
   const internalProps = {
@@ -191,10 +172,14 @@ module.exports = async (req, res) => {
     'Email đối tác': { rich_text: richText(emailMasked) },
     'SĐT đối tác': { rich_text: richText(phoneMasked) },
     'Ngành / nghề': { rich_text: richText(career) },
+    'Vị trí mong muốn': { rich_text: richText(location) },
+    'KMK/ZAB': { rich_text: richText(kmk) },
+    'NARIC': { rich_text: richText(naric) },
     'Ghi chú': { rich_text: richText(note) },
     'Mã hồ sơ': { rich_text: richText(lookupCode) },
     'Trạng thái': { select: { name: 'Mới nhận' } },
   };
+  if (dien) internalProps['Diện'] = { select: dien };
   if (level) internalProps['Trình độ tiếng Đức'] = { select: level };
   if (internalFiles.length) internalProps['Hồ sơ đính kèm'] = filesProp(internalFiles);
 
@@ -205,20 +190,22 @@ module.exports = async (req, res) => {
     'Email': { rich_text: richText(emailMasked) },
     'Số điện thoại': { rich_text: richText(phoneMasked) },
     'Ngành / nghề': { rich_text: richText(career) },
+    'Vị trí mong muốn': { rich_text: richText(location) },
+    'KMK/ZAB': { rich_text: richText(kmk) },
+    'NARIC': { rich_text: richText(naric) },
     'Ghi chú': { rich_text: richText(note) },
     'Mã hồ sơ': { rich_text: richText(lookupCode) },
     'Trạng thái': { select: { name: 'Mới' } },
   };
+  if (dien) sharedProps['Diện'] = { select: dien };
   if (level) sharedProps['Trình độ tiếng Đức'] = { select: level };
   if (sharedFiles.length) sharedProps['Hồ sơ đính kèm'] = filesProp(sharedFiles);
 
   try {
-    // DB nội bộ là nguồn chính. Lỗi ở đây → báo 502.
     const internalOk = await createPage(token, internalDbId, internalProps);
     if (!internalOk) {
       return res.status(502).json({ ok: false, error: 'Không ghi được vào Notion (DB nội bộ).' });
     }
-    // DB chia sẻ là phụ — lỗi vẫn coi như thành công, chỉ ghi log.
     const sharedOk = await createPage(token, sharedDbId, sharedProps);
     if (!sharedOk) console.error('Partner-upload: ghi DB chia sẻ đối tác Đức thất bại (code', lookupCode, ')');
 

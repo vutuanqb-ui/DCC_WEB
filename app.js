@@ -799,21 +799,40 @@ function renderPartnerUploadGate() {
   </div>`;
 }
 
+// Toàn bộ ngành nghề (gộp mọi chương trình, có nhóm) cho ô ngành nghề đối tác.
+function renderAllCareerOptions() {
+  const groups = Object.entries(GERMANY_CAREERS)
+    .map(([prog, list]) => `<optgroup label="${prog}">${list.map((c) => `<option>${c}</option>`).join('')}</optgroup>`)
+    .join('');
+  return `<option value="">— Chọn ngành / nghề —</option>${groups}<option>Ngành nghề khác (ghi rõ ở ghi chú)</option>`;
+}
+
 function renderPartnerUploadForm(account) {
   const levels = ['Chưa học', 'A1', 'A2', 'B1', 'B2'];
+  const dienList = ['Du học nghề', '18B', '18A', 'Au-pair', 'Thời vụ 8 tháng', 'Khác'];
+  const kmkOpts = ['Chưa làm', 'Đang làm', 'Đã có kết quả'];
   const who = [account.name, account.code ? `(${account.code})` : ''].filter(Boolean).join(' ');
   return `<form id="partnerUploadForm" class="lead-form account-form-full" novalidate>
     <legend>Form đối tác gửi hồ sơ ứng viên</legend>
     <p class="upload-who">Đang đăng nhập: <b>${who || 'Đối tác DCC'}</b> · <a class="text-link" href="#/hoc-vien">đổi tài khoản</a></p>
     <div class="form-grid-2">
       <label>Họ tên ứng viên<input name="candidate_name" placeholder="Tên ứng viên trong hồ sơ này (nếu có)"></label>
-      <label>Ngành / nghề ứng viên<input name="career" placeholder="VD: Điều dưỡng, Nhà hàng – khách sạn..."></label>
+      <label>Hồ sơ đi theo diện<select name="dien" data-partner-dien><option value="">— Chọn diện —</option>${dienList.map((d) => `<option>${d}</option>`).join('')}</select></label>
+      <label>Ngành / nghề ứng viên<select name="career">${renderAllCareerOptions()}</select></label>
+      <label>Vị trí làm việc (bang / thành phố)<select name="desired_location">${renderGermanyOptions()}</select></label>
+      <label>Trình độ tiếng Đức<select name="german_level"><option value="">— Chọn trình độ —</option>${levels.map((l) => `<option>${l}</option>`).join('')}</select></label>
       <label>Email đối tác<input type="email" name="partner_email" value="${account.email || ''}" placeholder="Để DCC liên hệ lại — không bắt buộc"></label>
       <label>SĐT / Zalo đối tác<input name="partner_phone" value="${account.phone || ''}" placeholder="Để DCC liên hệ lại — không bắt buộc"></label>
-      <label>Trình độ tiếng Đức<select name="german_level"><option value="">— Chọn trình độ —</option>${levels.map((l) => `<option>${l}</option>`).join('')}</select></label>
+    </div>
+    <div class="wish-note" data-partner-18 hidden>
+      <p class="wish-note-title">Hồ sơ diện 18A/18B — đã làm công nhận bằng chưa?</p>
+      <div class="form-grid-2">
+        <label>Đã có KMK/ZAB chưa?<select name="kmk_zab"><option value="">— Chọn —</option>${kmkOpts.map((o) => `<option>${o}</option>`).join('')}</select></label>
+        <label>Đã có NARIC chưa?<select name="naric"><option value="">— Chọn —</option>${kmkOpts.map((o) => `<option>${o}</option>`).join('')}</select></label>
+      </div>
     </div>
     <label>Ghi chú<textarea name="note" rows="3" placeholder="Thông tin thêm về ứng viên / bộ hồ sơ gửi kèm"></textarea></label>
-    <label>File hồ sơ<input type="file" data-partner-files multiple accept=".pdf,.jpg,.jpeg,.png,.doc,.docx,.heic,.webp,.zip,.rar"><small>Đính kèm CV, bằng cấp, giấy tờ của ứng viên. Tối đa 5 file, tổng dưới ~3MB. File lớn hơn vui lòng nén .zip hoặc liên hệ DCC để gửi qua kênh khác.</small></label>
+    <label>File hồ sơ<input type="file" data-partner-files multiple><small>Đính kèm mọi loại file (CV, bằng cấp, ảnh, giấy tờ...). Tối đa 50 file, mỗi file dưới ~4MB. File nặng hơn vui lòng nén lại hoặc liên hệ DCC.</small></label>
     <p class="form-note">🔒 Email và số điện thoại sẽ được che bớt (vd 09••••78) ở cả bản nội bộ lẫn bản gửi đối tác tại Đức — khi cần DCC liên hệ trực tiếp với bạn để lấy đầy đủ.</p>
     <button class="btn primary" type="submit">Gửi hồ sơ</button>
     <p id="partnerUploadMessage" class="form-message" role="status"></p>
@@ -849,7 +868,16 @@ function bindInteractions() {
   if (transferForm) bindJobTransferForm(transferForm);
 
   const partnerUpload = $('#partnerUploadForm');
-  if (partnerUpload) partnerUpload.addEventListener('submit', submitPartnerUpload);
+  if (partnerUpload) {
+    const dienSel = $('[data-partner-dien]', partnerUpload);
+    const block18 = $('[data-partner-18]', partnerUpload);
+    if (dienSel && block18) {
+      const sync18 = () => { block18.hidden = !['18A', '18B'].includes(dienSel.value); };
+      dienSel.addEventListener('change', sync18);
+      sync18();
+    }
+    partnerUpload.addEventListener('submit', submitPartnerUpload);
+  }
 
   const form = $('#leadForm');
   if (form) bindLeadForm(form);
@@ -1541,39 +1569,45 @@ async function submitPartnerUpload(event) {
   payload.partner_name = account.name || account.email || account.phone || 'Đối tác DCC';
   payload.partner_code = account.code || '';
 
-  // Đọc file hồ sơ (nếu có) — tối đa 5 file, tổng dưới ~3MB.
+  // File hồ sơ — tối đa 50 file, MỖI file ≤ ~4MB (gửi từng file để vượt giới hạn body của Vercel).
   const fileInput = $('[data-partner-files]', form);
-  const files = fileInput && fileInput.files ? Array.from(fileInput.files).slice(0, 5) : [];
+  const files = fileInput && fileInput.files ? Array.from(fileInput.files).slice(0, 50) : [];
   if (!files.length) { setMsg('Vui lòng đính kèm ít nhất 1 file hồ sơ ứng viên.', 'error'); return; }
-  const totalBytes = files.reduce((sum, f) => sum + f.size, 0);
-  if (totalBytes > 3 * 1024 * 1024) {
-    setMsg('Tổng dung lượng file vượt ~3MB. Vui lòng nén .zip hoặc liên hệ DCC để gửi qua kênh khác.', 'error');
-    return;
-  }
+  const tooBig = files.find((f) => f.size > 4 * 1024 * 1024);
+  if (tooBig) { setMsg(`File "${tooBig.name}" nặng hơn ~4MB. Vui lòng nén lại hoặc tách nhỏ rồi gửi.`, 'error'); return; }
 
   payload.lookup_code = `DCC-HS-${new Date().getFullYear()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-  delete payload.files;
 
+  const config = window.DCC_PUBLIC_CONFIG || {};
+  const endpoint = config.PARTNER_UPLOAD_API || '/api/partner-upload';
+  const post = (body) => fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+    .then(async (r) => { const d = await r.json().catch(() => ({})); if (!r.ok || !d.ok) throw new Error(d.error || `HTTP ${r.status}`); return d; });
+
+  const btn = $('button[type="submit"]', form);
   try {
-    setMsg('Đang tải hồ sơ lên...', '');
-    payload.files = await Promise.all(files.map(readFileAsBase64));
-    const config = window.DCC_PUBLIC_CONFIG || {};
-    const endpoint = config.PARTNER_UPLOAD_API || '/api/partner-upload';
-    const response = await fetch(endpoint, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
-    });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok || !data.ok) throw new Error(data.error || `HTTP ${response.status}`);
+    if (btn) btn.disabled = true;
+    // Bước 1: tải từng file lên (tuần tự, có hiển thị tiến độ).
+    const uploaded = [];
+    for (let i = 0; i < files.length; i++) {
+      setMsg(`Đang tải file ${i + 1}/${files.length}: ${files[i].name}...`, '');
+      const fileData = await readFileAsBase64(files[i]);
+      const res = await post({ action: 'upload_file', file: fileData });
+      uploaded.push(res.file);
+    }
+    // Bước 2: tạo hồ sơ với toàn bộ thông tin + file đã tải.
+    setMsg('Đang lưu hồ sơ...', '');
+    const data = await post({ ...payload, uploaded });
     if (data.lookup_code) payload.lookup_code = data.lookup_code;
     form.reset();
+    const block18 = $('[data-partner-18]', form); if (block18) block18.hidden = true;
     const fileMsg = data.files_uploaded ? ` Đã nhận ${data.files_uploaded} file hồ sơ.` : '';
     setMsg(`Cảm ơn bạn! DCC đã nhận hồ sơ và sẽ liên hệ lại sớm.${fileMsg} Mã hồ sơ: ${payload.lookup_code}`, 'success');
     if (window.dccTrack) dccTrack('Lead', { content_name: 'Đối tác gửi hồ sơ ứng viên' });
   } catch (error) {
     console.error(error);
-    setMsg('Hiện chưa gửi được. Vui lòng thử lại, hoặc liên hệ hotline/Zalo 076 778 7879 để được hỗ trợ.', 'error');
+    setMsg(`Chưa gửi được: ${error.message || 'lỗi không rõ'}. Vui lòng thử lại, hoặc liên hệ hotline/Zalo 076 778 7879.`, 'error');
+  } finally {
+    if (btn) btn.disabled = false;
   }
 }
 
