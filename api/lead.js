@@ -12,6 +12,8 @@ const NOTION_API = 'https://api.notion.com/v1/pages';
 const NOTION_VERSION = '2022-06-28';
 // DB chia sẻ cho ĐỐI TÁC TẠI ĐỨC (email/SĐT đã che). Bản nội bộ đầy đủ vẫn ở DB Lead.
 const DEFAULT_STUDENT_SHARED_DB_ID = 'f43d0200bbaf48fdb48cb2b3910eaab7';
+// DB NỘI BỘ riêng cho hồ sơ học viên (email/SĐT THẬT + file + Tình trạng xử lý để khách tra cứu).
+const DEFAULT_STUDENT_INTERNAL_DB_ID = 'bb1f8121ec17495e828b227a9b1ebfe1';
 const SHARED_LEVELS = ['Chưa học', 'A1', 'A2', 'B1', 'B2'];
 
 // Các lựa chọn hợp lệ của ô SELECT trong Notion (Notion báo lỗi nếu có dấu phẩy).
@@ -81,6 +83,37 @@ async function writeStudentShared(token, payload, fullName, lookupCode) {
     if (!r.ok) console.error('Student-shared write', r.status, await r.text());
   } catch (err) {
     console.error('Student-shared error', err);
+  }
+}
+
+// Ghi bản NỘI BỘ đầy đủ (email/SĐT thật) cho DB "Hồ sơ học viên (nội bộ)" (phụ — lỗi chỉ log, không chặn lead chính).
+async function writeStudentInternal(token, payload, fullName, lookupCode, extraLines) {
+  const dbId = process.env.NOTION_STUDENT_INTERNAL_DB_ID || DEFAULT_STUDENT_INTERNAL_DB_ID;
+  const props = {
+    'Họ và tên': { title: [{ text: { content: fullName.slice(0, 200) } }] },
+    'Số điện thoại': { phone_number: clean(payload.phone) },
+    'Tỉnh/thành': { rich_text: richText(payload.province) },
+    'Mã tra cứu': { rich_text: richText(lookupCode) },
+    'Thông tin thêm': { rich_text: richText(extraLines) },
+    'Nguồn': { select: selectValue(payload.source || 'Website') },
+    'Tình trạng xử lý': { select: { name: 'Đã tiếp nhận' } },
+  };
+  const email = clean(payload.email);
+  if (email) props['Email'] = { email };
+  const program = selectValue(payload.program_interest);
+  if (program) props['Chương trình'] = { select: program };
+  const level = selectValue(payload.german_level);
+  if (level) props['Trình độ tiếng Đức'] = { select: level };
+
+  try {
+    const r = await fetch(NOTION_API, {
+      method: 'POST',
+      headers: { 'Authorization': `Bearer ${token}`, 'Notion-Version': NOTION_VERSION, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ parent: { database_id: dbId }, properties: props }),
+    });
+    if (!r.ok) console.error('Student-internal write', r.status, await r.text());
+  } catch (err) {
+    console.error('Student-internal error', err);
   }
 }
 
@@ -167,7 +200,8 @@ module.exports = async (req, res) => {
       return res.status(502).json({ ok: false, error: 'Không ghi được vào Notion.' });
     }
 
-    // Ghi thêm bản CHE cho đối tác Đức (phụ, không chặn kết quả lead chính).
+    // Ghi thêm bản NỘI BỘ đầy đủ + bản CHE cho đối tác Đức (phụ, không chặn kết quả lead chính).
+    await writeStudentInternal(token, payload, fullName, lookupCode, extraLines);
     await writeStudentShared(token, payload, fullName, lookupCode);
 
     return res.status(200).json({ ok: true, lookup_code: lookupCode });

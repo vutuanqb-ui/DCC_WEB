@@ -180,6 +180,7 @@ module.exports = async (req, res) => {
     'Ghi chú': { rich_text: richText(note) },
     'Mã hồ sơ': { rich_text: richText(lookupCode) },
     'Trạng thái': { select: { name: 'Mới nhận' } },
+    'Tình trạng xử lý': { select: { name: 'Đã tiếp nhận' } },
   };
   if (dien) internalProps['Diện'] = { select: dien };
   if (level) internalProps['Trình độ tiếng Đức'] = { select: level };

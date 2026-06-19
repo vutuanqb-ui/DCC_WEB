@@ -846,14 +846,14 @@ function renderInternalApp() {
 function renderLookupPage() {
   const account = getAccount();
   const prefill = account ? (account.email || account.phone || account.code || '') : '';
-  return `<section class="page-hero"><div class="container"><p class="eyebrow">Tra cứu hồ sơ</p><h1>Tra cứu tiến độ hồ sơ</h1><p>Nhập mã tra cứu DCC đã cấp, hoặc email / số điện thoại bạn dùng khi đăng ký để xem tiến độ từng hồ sơ.</p></div></section>
+  return `<section class="page-hero"><div class="container"><p class="eyebrow">Tra cứu hồ sơ</p><h1>Tra cứu tiến độ hồ sơ</h1><p>Học viên nhập mã tra cứu / email / số điện thoại đã đăng ký. Đối tác nhập email / số điện thoại / mã hồ sơ để xem tình trạng hồ sơ đã gửi.</p></div></section>
   <section class="section"><div class="container narrow">
     <form id="lookupForm" class="lead-form lookup-form">
       <label>Mã tra cứu / Email / Số điện thoại
-        <input name="identifier" required value="${prefill}" placeholder="DCC-2026-xxxxx hoặc email / số điện thoại" />
+        <input name="identifier" required value="${prefill}" placeholder="DCC-2026-xxxxx · email · số điện thoại · mã hồ sơ" />
       </label>
       <button class="btn primary" type="submit">Tra cứu tiến độ</button>
-      <p class="muted">Tra cứu hiển thị toàn bộ hồ sơ/chương trình bạn đã đăng ký với DCC và tiến độ của từng hồ sơ.</p>
+      <p class="muted">Tra cứu hiển thị toàn bộ hồ sơ bạn đã đăng ký/gửi với DCC và tình trạng xử lý của từng hồ sơ.</p>
     </form>
     <div id="lookupResult" class="lookup-result" data-auto="${prefill ? '1' : ''}"></div>
   </div></section>`;
@@ -1346,6 +1346,8 @@ const PROFILE_SECTIONS = [
   ['Sang Đức & hỗ trợ', ['Đã bay', 'Đang hỗ trợ sau bay']],
 ];
 const STAGE_ORDER = ['Mới đăng ký', 'Đã tư vấn', 'Đang học tiếng', 'Đang hoàn thiện hồ sơ', 'Đã gửi đối tác', 'Chờ phỏng vấn', 'Đã có hợp đồng', 'Đang xử lý visa', 'Đã có visa', 'Đã bay', 'Đang hỗ trợ sau bay'];
+// "Tình trạng xử lý" (6 mức) — dùng cho hồ sơ học viên nội bộ & hồ sơ đối tác gửi. "Cần bổ sung" là trạng thái cảnh báo (ngoài thanh tiến độ).
+const TINH_TRANG_ORDER = ['Đã tiếp nhận', 'Đang xử lý', 'Đang hoàn thiện hồ sơ', 'Đã gửi đối tác', 'Hoàn tất'];
 
 function sectionIndexOfStage(stage) {
   const i = PROFILE_SECTIONS.findIndex(([, stages]) => stages.includes(stage));
@@ -1377,6 +1379,44 @@ function renderProgressDashboard(profile) {
 }
 
 function renderProfileCard(rec) {
+  if (TINH_TRANG_ORDER.includes(rec.stage) || rec.stage === 'Cần bổ sung') return renderStatusCard(rec);
+  return renderLegacyCard(rec);
+}
+
+// Thẻ tiến độ theo "Tình trạng xử lý" (6 mức) — hồ sơ học viên nội bộ & hồ sơ đối tác gửi.
+function renderStatusCard(rec) {
+  const need = rec.stage === 'Cần bổ sung';
+  const cur = need ? -1 : Math.max(0, TINH_TRANG_ORDER.indexOf(rec.stage));
+  const isFinal = rec.stage === 'Hoàn tất';
+  const percent = need ? 0 : Math.round(((cur + 1) / TINH_TRANG_ORDER.length) * 100);
+  const steps = TINH_TRANG_ORDER.map((label, i) => {
+    let cls = 'pending';
+    if (isFinal || i < cur) cls = 'done';
+    else if (i === cur && !need) cls = 'current';
+    return `<li class="prog-step ${cls}"><span class="ps-dot">${cls === 'done' ? '✓' : i + 1}</span><span class="ps-label">${label}</span></li>`;
+  }).join('');
+  const meta = [
+    rec.career && `Ngành/nghề: ${rec.career}`,
+    rec.level && `Tiếng Đức: ${rec.level}`,
+    rec.location && `Nơi: ${rec.location}`,
+    rec.code && `Mã: ${rec.code}`,
+    rec.date && `Ngày: ${formatVNDate(rec.date)}`,
+  ].filter(Boolean).map((m) => `<span>${m}</span>`).join('');
+  return `<article class="profile-card">
+    <div class="pc-head">
+      <div><span class="pc-source">${rec.source}</span><h3>${rec.program}</h3></div>
+      <span class="pc-stage">${rec.stage}</span>
+    </div>
+    ${need ? '<div class="pc-alert" style="color:#c0392b;font-weight:600;margin:.4rem 0;">⚠ Hồ sơ cần bổ sung — vui lòng liên hệ DCC để được hướng dẫn.</div>' : ''}
+    <div class="pc-bar"><span style="width:${percent}%"></span></div>
+    <div class="pc-percent">${isFinal ? 'Hoàn tất 100%' : (need ? 'Cần bổ sung hồ sơ' : `Tiến độ ${percent}%`)}</div>
+    <ol class="prog-steps">${steps}</ol>
+    ${meta ? `<div class="pc-meta">${meta}</div>` : ''}
+  </article>`;
+}
+
+// Thẻ tiến độ theo "Giai đoạn hồ sơ" (11 mốc → 6 phần) — dữ liệu cũ ở DB Lead / Thành viên.
+function renderLegacyCard(rec) {
   const stage = rec.stage || 'Mới đăng ký';
   const stageIdx = Math.max(0, STAGE_ORDER.indexOf(stage));
   const curSection = sectionIndexOfStage(stage);
