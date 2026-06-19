@@ -1378,15 +1378,18 @@ function renderProgressDashboard(profile) {
   return head + profile.records.map(renderProfileCard).join('');
 }
 
+const OLD_PROFILE_STATUS = 'Hồ sơ cũ (đã nhận trước đây)';
+
 function renderProfileCard(rec) {
-  if (TINH_TRANG_ORDER.includes(rec.stage) || rec.stage === 'Cần bổ sung') return renderStatusCard(rec);
+  if (TINH_TRANG_ORDER.includes(rec.stage) || rec.stage === 'Cần bổ sung' || rec.stage === OLD_PROFILE_STATUS) return renderStatusCard(rec);
   return renderLegacyCard(rec);
 }
 
 // Thẻ tiến độ theo "Tình trạng xử lý" (6 mức) — hồ sơ học viên nội bộ & hồ sơ đối tác gửi.
 function renderStatusCard(rec) {
   const need = rec.stage === 'Cần bổ sung';
-  const cur = need ? -1 : Math.max(0, TINH_TRANG_ORDER.indexOf(rec.stage));
+  const isOld = rec.stage === OLD_PROFILE_STATUS; // hồ sơ nhận từ trước (ngoài web) — coi như đã tiếp nhận
+  const cur = (need ? -1 : Math.max(0, TINH_TRANG_ORDER.indexOf(rec.stage))); // isOld → indexOf = -1 → 0 (Đã tiếp nhận)
   const isFinal = rec.stage === 'Hoàn tất';
   const percent = need ? 0 : Math.round(((cur + 1) / TINH_TRANG_ORDER.length) * 100);
   const steps = TINH_TRANG_ORDER.map((label, i) => {
@@ -1408,6 +1411,7 @@ function renderStatusCard(rec) {
       <span class="pc-stage">${rec.stage}</span>
     </div>
     ${need ? '<div class="pc-alert" style="color:#c0392b;font-weight:600;margin:.4rem 0;">⚠ Hồ sơ cần bổ sung — vui lòng liên hệ DCC để được hướng dẫn.</div>' : ''}
+    ${isOld ? '<div class="pc-note" style="color:#7a5c3a;font-weight:600;margin:.4rem 0;">Hồ sơ đã được DCC tiếp nhận từ trước, đang trong quá trình xử lý.</div>' : ''}
     <div class="pc-bar"><span style="width:${percent}%"></span></div>
     <div class="pc-percent">${isFinal ? 'Hoàn tất 100%' : (need ? 'Cần bổ sung hồ sơ' : `Tiến độ ${percent}%`)}</div>
     <ol class="prog-steps">${steps}</ol>
