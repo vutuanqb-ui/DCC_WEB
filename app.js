@@ -1867,7 +1867,7 @@ async function submitLead(event) {
     setMessage(`Cảm ơn anh/chị. DCC đã nhận thông tin và sẽ liên hệ tư vấn sớm. Mã tra cứu của bạn: ${payload.lookup_code}`, 'success');
   } catch (error) {
     console.error(error);
-    setMessage('Hiện chưa gửi được thông tin. Bạn vui lòng thử lại, hoặc liên hệ trực tiếp DCC qua hotline/Zalo/Facebook để được hỗ trợ nhanh.', 'error');
+    setMessage('Hiện chưa gửi được thông tin. Bạn vui lòng thử lại, hoặc liên hệ trực tiếp DCC qua hotline/Zalo để được hỗ trợ nhanh.', 'error');
   }
 }
 
